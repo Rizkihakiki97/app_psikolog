@@ -1,3 +1,4 @@
+import 'package:app_psikolog/view/calendar_sessions_page.dart'; // pastikan path ini sesuai dengan struktur project kamu
 import 'package:flutter/material.dart';
 
 class HomePageMindcare extends StatelessWidget {
@@ -11,7 +12,7 @@ class HomePageMindcare extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // ======== HEADER (Welcome) ========
+              // HEADER (Welcome)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 25, 20, 30),
@@ -40,7 +41,7 @@ class HomePageMindcare extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "Hi, Rizky Hakiki 👋",
+                              "Hi, Rizky Hakiki",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
@@ -76,14 +77,38 @@ class HomePageMindcare extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    // Horizontal Menu
+                    // Horizontal Menu (ubah jadi pakai GestureDetector)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _menuCard(Icons.chat_bubble_outline, "Consult"),
-                        _menuCard(Icons.calendar_today_outlined, "Schedule"),
-                        _menuCard(Icons.favorite_border, "Tracker"),
-                        _menuCard(Icons.people_outline, "Community"),
+                        _menuCard(
+                          icon: Icons.chat_bubble_outline,
+                          label: "Consult",
+                          onTap: () {},
+                        ),
+                        _menuCard(
+                          icon: Icons.calendar_today_outlined,
+                          label: "Schedule",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const CalendarSessionsPage(),
+                              ),
+                            );
+                          },
+                        ),
+                        _menuCard(
+                          icon: Icons.favorite_border,
+                          label: "Tracker",
+                          onTap: () {},
+                        ),
+                        _menuCard(
+                          icon: Icons.people_outline,
+                          label: "Community",
+                          onTap: () {},
+                        ),
                       ],
                     ),
                   ],
@@ -92,16 +117,13 @@ class HomePageMindcare extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // ======== MOOD TRACKER CARD ========
+              // MOOD TRACKER CARD
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFF3F8FF), // Putih kebiruan
-                      Color(0xFFE7F0FF), // Biru lembut
-                    ],
+                    colors: [Color(0xFFF3F8FF), Color(0xFFE7F0FF)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -134,16 +156,6 @@ class HomePageMindcare extends StatelessWidget {
                             style: TextStyle(color: Colors.grey),
                           ),
                           const SizedBox(height: 10),
-                          // ElevatedButton(
-                          //   onPressed: () {},
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: const Color(0xFF3D8BFF),
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(12),
-                          //     ),
-                          //   ),
-
-                          // ),
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
@@ -155,9 +167,7 @@ class HomePageMindcare extends StatelessWidget {
                             child: const Text(
                               "Check Now",
                               style: TextStyle(
-                                color:
-                                    Colors.white, //  ubah warna teks jadi putih
-                                // Colors.pinkAccent, //  ubah warna teks jadi putih
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -173,7 +183,7 @@ class HomePageMindcare extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              // ======== FEATURED PSYCHOLOGISTS ========
+              //FEATURED PSYCHOLOGISTS
               _sectionHeader("Featured Psychologists"),
               _psychologistCard(
                 image: "assets/image/gambar/dokter1.jpg",
@@ -199,7 +209,7 @@ class HomePageMindcare extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              // ======== MENTAL HEALTH TIPS ========
+              //MENTAL HEALTH TIPS
               _sectionHeader("Mental Health Tips"),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -232,32 +242,39 @@ class HomePageMindcare extends StatelessWidget {
     );
   }
 
-  // ======== REUSABLE COMPONENTS ========
+  // REUSABLE COMPONENTS
 
-  static Widget _menuCard(IconData icon, String label) {
-    return Container(
-      width: 70,
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: Color(0xFF3D8BFF), size: 26),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: Colors.black87),
-          ),
-        ],
+  static Widget _menuCard({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 70,
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: const Color(0xFF3D8BFF), size: 26),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: Colors.black87),
+            ),
+          ],
+        ),
       ),
     );
   }

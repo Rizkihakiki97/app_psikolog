@@ -1,6 +1,8 @@
+import 'package:app_psikolog/view/bottom_navbar.dart';
 import 'package:app_psikolog/view/registrasi_screen.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginScreenMindcare extends StatefulWidget {
@@ -195,10 +197,16 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // Fluttertoast.showToast(
-                              //   msg: "Login successful",
-                              //   gravity: ToastGravity.BOTTOM,
-                              // );
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BottomNavbar(),
+                                ),
+                              );
+                              Fluttertoast.showToast(
+                                msg: "Login successful",
+                                gravity: ToastGravity.BOTTOM,
+                              );
                             }
                           },
                           child: const Text(

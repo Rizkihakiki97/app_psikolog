@@ -11,7 +11,7 @@ class CalendarSessionsPage extends StatefulWidget {
 class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
   DateTime selectedDate = DateTime.now();
 
-  // Contoh data dummy untuk jadwal pasien
+  // Data dummy jadwal pasien
   final Map<String, List<Map<String, String>>> sessions = {
     '2025-11-01': [
       {'name': 'Sarah Johnson', 'time': '09:00 AM'},
@@ -29,20 +29,39 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FA),
+
+      // ✅ AppBar dengan tombol panah kiri di atas "My Sessions Calendar"
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF3D8BFF),
+        elevation: 0,
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+        //   onPressed: () {
+        //     Navigator.pop(context); // Kembali ke halaman sebelumnya
+        //   },
+        // ),
+        title: const Text(
+          "My Sessions Calendar",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+
+      // ✅ Isi Halaman
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header merah
+            // Header biru
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(
-                top: 60,
+                top: 20,
                 left: 20,
                 right: 20,
                 bottom: 30,
               ),
               decoration: const BoxDecoration(
-                color: Color(0xFF569ad1),
+                color: Color(0xFF3D8BFF),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(25),
                   bottomRight: Radius.circular(25),
@@ -51,15 +70,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "My Sessions Calendar",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 10),
                   Text(
                     "Check and manage patient appointments",
                     style: TextStyle(color: Colors.white70, fontSize: 15),
@@ -70,16 +81,16 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
 
             const SizedBox(height: 20),
 
-            // Kalender (date picker)
+            // ✅ Kalender (Date Picker)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 255, 255),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Color.fromARGB(255, 0, 0, 0).withOpacity(0.08),
+                      color: Colors.black.withOpacity(0.08),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -100,14 +111,14 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
 
             const SizedBox(height: 20),
 
-            // Daftar jadwal
+            // ✅ Daftar Jadwal Hari Ini
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 255, 255),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -128,6 +139,8 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
                       ),
                     ),
                     const SizedBox(height: 10),
+
+                    // Jika tidak ada sesi
                     if (todaySessions.isEmpty)
                       const Center(
                         child: Padding(
@@ -138,6 +151,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
                           ),
                         ),
                       )
+                    // Jika ada sesi
                     else
                       Column(
                         children: todaySessions.map((session) {

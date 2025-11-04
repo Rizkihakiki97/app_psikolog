@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:app_psikolog/view/home_page_screen.dart';
 import 'package:app_psikolog/view/bottom_navbar.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +31,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: HomePageMindcare(),
+      home: BottomNavbar(),
     );
   }
 }

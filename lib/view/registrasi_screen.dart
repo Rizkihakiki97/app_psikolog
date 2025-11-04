@@ -1,3 +1,4 @@
+import 'package:app_psikolog/view/bottom_navbar.dart';
 import 'package:app_psikolog/view/login_screen_mindcare.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
@@ -193,6 +194,12 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BottomNavbar(),
+                                ),
+                              );
                               Fluttertoast.showToast(
                                 msg: "Login registration",
                                 gravity: ToastGravity.BOTTOM,

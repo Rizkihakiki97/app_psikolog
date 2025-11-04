@@ -1,3 +1,4 @@
+import 'package:app_psikolog/view/editprofile.dart';
 import 'package:app_psikolog/view/login_screen_mindcare.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,7 @@ class ProfilePage extends StatelessWidget {
                 bottom: 30,
               ),
               decoration: const BoxDecoration(
-                color: Color(0xFF569ad1),
+                color: Color(0xFF3D8BFF),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(25),
                   bottomRight: Radius.circular(25),
@@ -105,7 +106,14 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.person_outlined,
               title: "Edit Profile",
               subtitle: "Update your personal information",
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditProfilePage(),
+                  ),
+                );
+              },
               color: Colors.blue,
             ),
             _ProfileMenu(
