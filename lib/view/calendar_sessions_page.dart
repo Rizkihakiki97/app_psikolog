@@ -1,5 +1,7 @@
+import 'package:app_psikolog/model/session_data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+// import '../models/session_data.dart'; // ✅ import global data
 
 class CalendarSessionsPage extends StatefulWidget {
   const CalendarSessionsPage({super.key});
@@ -11,199 +13,227 @@ class CalendarSessionsPage extends StatefulWidget {
 class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
   DateTime selectedDate = DateTime.now();
 
-  // Data dummy jadwal pasien
-  final Map<String, List<Map<String, String>>> sessions = {
-    '2025-11-01': [
-      {'name': 'Sarah Johnson', 'time': '09:00 AM'},
-      {'name': 'Michael Chen', 'time': '01:30 PM'},
-    ],
-    '2025-11-02': [
-      {'name': 'Emily Roberts', 'time': '10:15 AM'},
-    ],
-  };
+  void _addAppointment() {
+    String pasien = '';
+    String dokter = '';
+    String waktu = '';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Tambah Konsultasi"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              decoration: const InputDecoration(labelText: "Nama Pasien"),
+              onChanged: (v) => pasien = v,
+            ),
+            TextField(
+              decoration: const InputDecoration(labelText: "Nama Dokter"),
+              onChanged: (v) => dokter = v,
+            ),
+            TextField(
+              decoration: const InputDecoration(labelText: "Waktu"),
+              onChanged: (v) => waktu = v,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Batal")),
+          ElevatedButton(
+            onPressed: () {
+              if (pasien.isNotEmpty && dokter.isNotEmpty && waktu.isNotEmpty) {
+                setState(() {
+                  String key = DateFormat('yyyy-MM-dd').format(selectedDate);
+                  SessionData.appointments.putIfAbsent(key, () => []);
+                  SessionData.appointments[key]!.add({
+                    'pasien': pasien,
+                    'dokter': dokter,
+                    'waktu': waktu,
+                  });
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("Simpan"),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _editAppointment(int index) {
+    String key = DateFormat('yyyy-MM-dd').format(selectedDate);
+    var current = SessionData.appointments[key]![index];
+    String pasien = current['pasien']!;
+    String dokter = current['dokter']!;
+    String waktu = current['waktu']!;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Konsultasi"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: TextEditingController(text: pasien),
+              decoration: const InputDecoration(labelText: "Nama Pasien"),
+              onChanged: (v) => pasien = v,
+            ),
+            TextField(
+              controller: TextEditingController(text: dokter),
+              decoration: const InputDecoration(labelText: "Nama Dokter"),
+              onChanged: (v) => dokter = v,
+            ),
+            TextField(
+              controller: TextEditingController(text: waktu),
+              decoration: const InputDecoration(labelText: "Waktu"),
+              onChanged: (v) => waktu = v,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Batal")),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                SessionData.appointments[key]![index] = {
+                  'pasien': pasien,
+                  'dokter': dokter,
+                  'waktu': waktu,
+                };
+              });
+              Navigator.pop(context);
+            },
+            child: const Text("Simpan"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteAppointment(int index) {
+    String key = DateFormat('yyyy-MM-dd').format(selectedDate);
+    setState(() {
+      SessionData.appointments[key]!.removeAt(index);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
-    List<Map<String, String>> todaySessions = sessions[formattedDate] ?? [];
+    List<Map<String, String>> sessions = SessionData.appointments[formattedDate] ?? [];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F6FA),
-
-      // ✅ AppBar dengan tombol panah kiri di atas "My Sessions Calendar"
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF3D8BFF),
-        elevation: 0,
-        // leading: IconButton(
-        //   icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-        //   onPressed: () {
-        //     Navigator.pop(context); // Kembali ke halaman sebelumnya
-        //   },
-        // ),
-        title: const Text(
-          "My Sessions Calendar",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text("My Sessions Calendar"),
+        backgroundColor: Colors.blueAccent,
         centerTitle: true,
       ),
-
-      // ✅ Isi Halaman
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header biru
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(
-                top: 20,
-                left: 20,
-                right: 20,
-                bottom: 30,
-              ),
-              decoration: const BoxDecoration(
-                color: Color(0xFF3D8BFF),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(25),
-                  bottomRight: Radius.circular(25),
-                ),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 10),
-                  Text(
-                    "Check and manage patient appointments",
-                    style: TextStyle(color: Colors.white70, fontSize: 15),
-                  ),
-                ],
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blueAccent,
+        onPressed: _addAppointment,
+        child: const Icon(Icons.add),
+      ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Colors.blueAccent,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(25),
+                bottomRight: Radius.circular(25),
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            // ✅ Kalender (Date Picker)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: CalendarDatePicker(
-                  initialDate: selectedDate,
-                  firstDate: DateTime(2024),
-                  lastDate: DateTime(2026),
-                  onDateChanged: (newDate) {
-                    setState(() {
-                      selectedDate = newDate;
-                    });
-                  },
-                ),
+            padding: const EdgeInsets.symmetric(vertical: 25),
+            child: Column(
+              children: const [
+                Text("My Sessions Calendar",
+                    style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold)),
+                SizedBox(height: 5),
+                Text("Check and manage patient appointments",
+                    style: TextStyle(fontSize: 14, color: Colors.white70)),
+              ],
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(color: Colors.black12.withOpacity(0.05), blurRadius: 8),
+              ],
+            ),
+            child: CalendarDatePicker(
+              initialDate: selectedDate,
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+              onDateChanged: (date) => setState(() => selectedDate = date),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Appointments on ${DateFormat('EEEE, MMM d').format(selectedDate)}",
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            // ✅ Daftar Jadwal Hari Ini
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: sessions.isEmpty
+                ? const Center(
+                    child: Text(
+                      "No sessions scheduled for this day.",
+                      style: TextStyle(color: Colors.grey),
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Appointments on ${DateFormat('EEEE, MMM d').format(selectedDate)}",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Jika tidak ada sesi
-                    if (todaySessions.isEmpty)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                          child: Text(
-                            "No sessions scheduled for this day.",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      )
-                    // Jika ada sesi
-                    else
-                      Column(
-                        children: todaySessions.map((session) {
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF9FBFD),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.grey.shade200),
+                  )
+                : ListView.builder(
+                    itemCount: sessions.length,
+                    itemBuilder: (context, index) {
+                      var data = sessions[index];
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(12),
+                            leading: const Icon(Icons.person, color: Colors.blueAccent),
+                            title: Text(
+                              data['pasien']!,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            subtitle: Text(
+                              '${data['dokter']} • ${data['waktu']}',
+                              style: const TextStyle(color: Colors.black54, fontSize: 13),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      session['name']!,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      session['time']!,
-                                      style: const TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.green),
+                                  onPressed: () => _editAppointment(index),
                                 ),
-                                const Icon(
-                                  Icons.video_call_rounded,
-                                  color: Colors.blueAccent,
-                                  size: 28,
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () => _deleteAppointment(index),
                                 ),
                               ],
                             ),
-                          );
-                        }).toList(),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-          ],
-        ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }

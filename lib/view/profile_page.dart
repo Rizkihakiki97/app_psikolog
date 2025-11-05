@@ -1,5 +1,6 @@
 import 'package:app_psikolog/view/editprofile.dart';
 import 'package:app_psikolog/view/login_screen_mindcare.dart';
+import 'package:app_psikolog/global_data.dart'; // ✅ Tambahkan ini
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -7,12 +8,17 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Ambil data global
+    final totalSessions = GlobalData.totalSessions;
+    final activeSessions = GlobalData.activeSessions;
+    final savedSessions = GlobalData.savedSessions;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FA),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header merah
+            // Header
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(
@@ -86,12 +92,16 @@ class ProfilePage extends StatelessWidget {
                       style: TextStyle(color: Colors.black45),
                     ),
                     const SizedBox(height: 20),
+                    // ✅ Ambil data dari global
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: const [
-                        _ProfileStat(label: "Sessions", value: "24"),
-                        _ProfileStat(label: "Active", value: "3"),
-                        _ProfileStat(label: "Saved", value: "5"),
+                      children: [
+                        _ProfileStat(
+                          label: "Sessions",
+                          value: "$totalSessions",
+                        ),
+                        _ProfileStat(label: "Active", value: "$activeSessions"),
+                        _ProfileStat(label: "Saved", value: "$savedSessions"),
                       ],
                     ),
                   ],
@@ -119,14 +129,14 @@ class ProfilePage extends StatelessWidget {
             _ProfileMenu(
               icon: Icons.calendar_today_outlined,
               title: "My Appointments",
-              subtitle: "3 upcoming sessions",
+              subtitle: "$activeSessions upcoming sessions", // ✅ dinamis
               onTap: () {},
               color: Colors.red.shade300,
             ),
             _ProfileMenu(
               icon: Icons.favorite_border,
               title: "Saved Psychologists",
-              subtitle: "5 saved",
+              subtitle: "$savedSessions saved", // ✅ dinamis
               onTap: () {},
               color: Colors.yellow.shade300,
             ),
@@ -222,16 +232,6 @@ class ProfilePage extends StatelessWidget {
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      // backgroundColor: Colors.redAccent,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadiusGeometry.circular(12),
-                      ),
-                    ),
                     icon: const Icon(Icons.logout, color: Colors.red),
                     label: const Text(
                       "Logout",
@@ -248,7 +248,6 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Versi
             const Text("Mindcare v1.0.6", style: TextStyle(color: Colors.grey)),
 
             const SizedBox(height: 40),
@@ -259,7 +258,7 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-// Widget untuk statistik
+// Widget Statistik
 class _ProfileStat extends StatelessWidget {
   final String label;
   final String value;
@@ -280,7 +279,7 @@ class _ProfileStat extends StatelessWidget {
   }
 }
 
-// Widget untuk menu profil
+// Widget Menu Profil
 class _ProfileMenu extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -357,7 +356,7 @@ class _ProfileMenu extends StatelessWidget {
   }
 }
 
-// Widget untuk setting tile
+// Widget Setting
 class _SettingTile extends StatelessWidget {
   final String title;
   final String? value;
