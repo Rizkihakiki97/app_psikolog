@@ -1,6 +1,7 @@
 import 'package:app_psikolog/database/db_helper.dart';
 import 'package:app_psikolog/model/role_model.dart';
 import 'package:flutter/material.dart';
+
 // import '../db/app_database.dart';
 // import '../models/role_model.dart';
 
@@ -30,6 +31,7 @@ class _RolePageState extends State<RolePage> {
   }
 
   Future<void> _addRole(String name) async {
+    if (name.isEmpty) return;
     final db = await AppDatabase.instance.database;
     await db.insert('roles', {'name': name});
     controller.clear();

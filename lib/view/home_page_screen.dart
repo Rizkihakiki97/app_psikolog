@@ -1,3 +1,4 @@
+import 'package:app_psikolog/pages/community_page.dart';
 import 'package:app_psikolog/view/calendar_sessions_page.dart'; // pastikan path ini sesuai dengan struktur project kamu
 import 'package:flutter/material.dart';
 
@@ -107,7 +108,14 @@ class HomePageMindcare extends StatelessWidget {
                         _menuCard(
                           icon: Icons.people_outline,
                           label: "Community",
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CommunityPage(),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

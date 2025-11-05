@@ -1,17 +1,18 @@
 import 'package:app_psikolog/database/db_helper.dart';
 import 'package:app_psikolog/model/booking_model.dart';
 import 'package:flutter/material.dart';
-// import 'database/db_helper';
+
+// import '../db/app_database.dart';
 // import '../models/booking_model.dart';
 
-class BookingCrudPage extends StatefulWidget {
-  const BookingCrudPage({super.key});
+class BookingPage extends StatefulWidget {
+  const BookingPage({super.key});
 
   @override
-  State<BookingCrudPage> createState() => _BookingCrudPageState();
+  State<BookingPage> createState() => _BookingPageState();
 }
 
-class _BookingCrudPageState extends State<BookingCrudPage> {
+class _BookingPageState extends State<BookingPage> {
   List<BookingModel> bookings = [];
   final nameCtrl = TextEditingController();
   final specCtrl = TextEditingController();
@@ -34,6 +35,7 @@ class _BookingCrudPageState extends State<BookingCrudPage> {
   }
 
   Future<void> _addBooking() async {
+    if (nameCtrl.text.isEmpty || specCtrl.text.isEmpty) return;
     final db = await AppDatabase.instance.database;
     await db.insert('bookings', {
       'doctorName': nameCtrl.text,
