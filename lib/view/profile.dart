@@ -1,5 +1,5 @@
 import 'package:app_psikolog/view/editprofile.dart';
-import 'package:app_psikolog/view/login_screen_mindcare.dart';
+import 'package:app_psikolog/view/login_mindcare.dart';
 import 'package:app_psikolog/global_data.dart'; // ✅ Tambahkan ini
 import 'package:flutter/material.dart';
 

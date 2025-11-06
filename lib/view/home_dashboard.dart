@@ -1,5 +1,5 @@
 import 'package:app_psikolog/pages/community_page.dart';
-import 'package:app_psikolog/view/calendar_sessions_page.dart'; // pastikan path ini sesuai dengan struktur project kamu
+import 'package:app_psikolog/view/calendar_sessions.dart'; // pastikan path ini sesuai dengan struktur project kamu
 import 'package:flutter/material.dart';
 
 class HomePageMindcare extends StatelessWidget {
@@ -88,7 +88,7 @@ class HomePageMindcare extends StatelessWidget {
                           onTap: () {},
                         ),
                         _menuCard(
-                          icon: Icons.calendar_today_outlined,
+                          icon: Icons.people_alt,
                           label: "Schedule",
                           onTap: () {
                             Navigator.push(
@@ -106,8 +106,8 @@ class HomePageMindcare extends StatelessWidget {
                           onTap: () {},
                         ),
                         _menuCard(
-                          icon: Icons.people_outline,
-                          label: "Community",
+                          icon: Icons.event,
+                          label: "Booking",
                           onTap: () {
                             Navigator.push(
                               context,

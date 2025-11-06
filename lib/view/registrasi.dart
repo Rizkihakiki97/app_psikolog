@@ -1,18 +1,17 @@
-import 'package:app_psikolog/view/bottom_navbar.dart';
-import 'package:app_psikolog/view/registrasi_screen.dart';
+import 'package:app_psikolog/view/login_mindcare.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
 
-class LoginScreenMindcare extends StatefulWidget {
-  const LoginScreenMindcare({super.key});
+class RegistrasiScreen extends StatefulWidget {
+  const RegistrasiScreen({super.key});
 
   @override
-  State<LoginScreenMindcare> createState() => _LoginScreenMindcareState();
+  State<RegistrasiScreen> createState() => _RegistrasiScreenState();
 }
 
-class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
+class _RegistrasiScreenState extends State<RegistrasiScreen> {
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -21,63 +20,58 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A3D64),
+      backgroundColor: Color(0xFF1A3D64),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              //  LOGO DI ATAS
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 28,
-                  vertical: 40,
-                ),
-                child: Row(
+                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFDCEAFF),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.psychology_outlined,
-                        color: Color(0xFF3D8BFF),
-                        size: 32,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          "Mindcare",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                        Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFDCEAFF),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            Icons.psychology_outlined,
+                            color: Color(0xFF3D8BFF),
+                            size: 32,
                           ),
                         ),
-                        Text(
-                          "Your mental wellness companion",
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Color.fromARGB(255, 109, 106, 106),
-                          ),
+                        SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Mindcare",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Your mental wellness companion",
+                      style: TextStyle(fontSize: 13, color: Colors.grey),
                     ),
                   ],
                 ),
               ),
-
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 28,
-                  vertical: 30,
-                ),
-                decoration: const BoxDecoration(
+                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 30),
+                decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(28),
@@ -96,26 +90,19 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      //TEKS WELCOME
-                      const Text(
-                        "Welcome Back",
+                      Text("Create Account", style: TextStyle(fontSize: 22)),
+                      SizedBox(height: 5),
+                      Text(
+                        "Sign up to get started",
                         style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          fontSize: 19,
+                          color: const Color.fromARGB(255, 85, 83, 83),
                         ),
                       ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        "Sign in to continue",
-                        style: TextStyle(fontSize: 15, color: Colors.grey),
-                      ),
+                      SizedBox(height: 30),
 
-                      const SizedBox(height: 30),
-
-                      //EMAIL
-                      const Text(
-                        "Email",
+                      Text(
+                        "Full Name",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
@@ -123,6 +110,19 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                         ),
                       ),
                       const SizedBox(height: 8),
+                      TextfieldCont(
+                        controller: usernameController,
+                        hintText: "Enter your name",
+                      ),
+                      Text(
+                        "Email",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 8),
                       TextfieldCont(
                         controller: emailController,
                         hintText: "Enter your email",
@@ -139,7 +139,6 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
 
                       const SizedBox(height: 18),
 
-                      //PASSWORD
                       const Text(
                         "Password",
                         style: TextStyle(
@@ -148,7 +147,7 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           fontSize: 14,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       TextfieldCont(
                         controller: passwordController,
                         hintText: "Enter your password",
@@ -158,19 +157,18 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           if (value == null || value.isEmpty) {
                             return "Password cannot be empty";
                           } else if (value.length < 6) {
-                            return "Password must be at least 6 characters";
+                            return "Password must br at least 6 characters";
                           }
                           return null;
                         },
                       ),
-
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {},
-                          child: const Text(
-                            "Forgot Password?",
+                          child: Text(
+                            "Forgot Password",
                             style: TextStyle(
                               color: Color(0xFF3D8BFF),
                               fontSize: 14,
@@ -179,10 +177,8 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 15),
 
-                      const SizedBox(height: 15),
-
-                      //SIGN IN BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -200,17 +196,17 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => BottomNavbar(),
+                                  builder: (context) => LoginScreenMindcare(),
                                 ),
                               );
                               Fluttertoast.showToast(
-                                msg: "Login successful",
+                                msg: "Login registration",
                                 gravity: ToastGravity.BOTTOM,
                               );
                             }
                           },
                           child: const Text(
-                            "Sign In",
+                            "Sign Up",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
@@ -220,9 +216,8 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                         ),
                       ),
 
-                      const SizedBox(height: 30),
+                      SizedBox(height: 30),
 
-                      //DIVIDER
                       Row(
                         children: [
                           Expanded(
@@ -231,8 +226,10 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                               thickness: 1,
                             ),
                           ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
+                          Padding(
+                            padding: EdgeInsetsGeometry.symmetric(
+                              horizontal: 10,
+                            ),
                             child: Text(
                               "Or continue with",
                               style: TextStyle(color: Colors.grey),
@@ -247,9 +244,8 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                         ],
                       ),
 
-                      const SizedBox(height: 25),
+                      SizedBox(height: 25),
 
-                      //GOOGLE BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 48,
@@ -263,15 +259,18 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                             elevation: 0,
                           ),
                           onPressed: () {
-                            // Fluttertoast.showToast(
-                            //   msg: "Google Sign In clicked",
-                            // );
+                            Fluttertoast.showToast(
+                              msg: "Google Sign In clicked",
+                            );
                           },
+
                           // icon: Image.asset(
-                          //   "assets/images/google.png",
+                          //   "assets/images/google_satu.png",
                           //   height: 20,
-                          //   width: 20,
+                          //   width: ,
                           // ),
+
+                          // KOMENT
                           label: const Text(
                             "Continue with Google",
                             style: TextStyle(
@@ -281,15 +280,13 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 35),
 
-                      const SizedBox(height: 35),
-
-                      //SIGN UP
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            "Don't have an account?",
+                          Text(
+                            "Already have an account?",
                             style: TextStyle(color: Colors.grey),
                           ),
                           TextButton(
@@ -297,12 +294,12 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => RegistrasiScreen(),
+                                  builder: (context) => LoginScreenMindcare(),
                                 ),
                               );
                             },
-                            child: const Text(
-                              "Sign In",
+                            child: Text(
+                              "Sign Up",
                               style: TextStyle(
                                 color: Color(0xFF3D8BFF),
                                 fontWeight: FontWeight.bold,

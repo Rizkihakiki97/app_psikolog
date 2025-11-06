@@ -21,7 +21,7 @@ class _ChatPageState extends State<ChatPage> {
         'timestamp': DateTime.now().toString(),
       });
 
-      // Jika pasien yang mengirim pesan → psikolog balas otomatis
+      // Jika pasien yang mengirim pesan -> psikolog balas otomatis
       if (sender == 'patient') {
         Future.delayed(const Duration(seconds: 1), () {
           setState(() {

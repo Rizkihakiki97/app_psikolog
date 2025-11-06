@@ -1,9 +1,9 @@
-import 'package:app_psikolog/view/calendar_sessions_page.dart';
-import 'package:app_psikolog/view/chat_page.dart';
+import 'package:app_psikolog/view/calendar_sessions.dart';
+import 'package:app_psikolog/view/chat_view.dart';
 import 'package:flutter/material.dart';
 
-import 'home_page_screen.dart';
-import 'profile_page.dart';
+import 'home_dashboard.dart';
+import 'profile.dart';
 // import 'sessions_page.dart';
 
 class BottomNavbar extends StatefulWidget {

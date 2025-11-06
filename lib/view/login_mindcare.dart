@@ -1,18 +1,18 @@
 import 'package:app_psikolog/view/bottom_navbar.dart';
-import 'package:app_psikolog/view/login_screen_mindcare.dart';
+import 'package:app_psikolog/view/registrasi.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 
-class RegistrasiScreen extends StatefulWidget {
-  const RegistrasiScreen({super.key});
+class LoginScreenMindcare extends StatefulWidget {
+  const LoginScreenMindcare({super.key});
 
   @override
-  State<RegistrasiScreen> createState() => _RegistrasiScreenState();
+  State<LoginScreenMindcare> createState() => _LoginScreenMindcareState();
 }
 
-class _RegistrasiScreenState extends State<RegistrasiScreen> {
-  final TextEditingController usernameController = TextEditingController();
+class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -21,58 +21,63 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A3D64),
+      backgroundColor: const Color(0xFF1A3D64),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
+              //  LOGO DI ATAS
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 40,
+                ),
+                child: Row(
                   children: [
-                    Row(
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDCEAFF),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(
+                        Icons.psychology_outlined,
+                        color: Color(0xFF3D8BFF),
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFDCEAFF),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Icon(
-                            Icons.psychology_outlined,
-                            color: Color(0xFF3D8BFF),
-                            size: 32,
+                        Text(
+                          "Mindcare",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
-                        SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Mindcare",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          "Your mental wellness companion",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color.fromARGB(255, 109, 106, 106),
+                          ),
                         ),
                       ],
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      "Your mental wellness companion",
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
                     ),
                   ],
                 ),
               ),
+
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 30),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 30,
+                ),
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(28),
@@ -91,31 +96,25 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Create Account", style: TextStyle(fontSize: 22)),
-                      SizedBox(height: 5),
-                      Text(
-                        "Sign up to get started",
+                      //TEKS WELCOME
+                      const Text(
+                        "Welcome Back",
                         style: TextStyle(
-                          fontSize: 19,
-                          color: const Color.fromARGB(255, 85, 83, 83),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-
-                      Text(
-                        "Full Name",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                           color: Colors.black87,
-                          fontSize: 14,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      TextfieldCont(
-                        controller: usernameController,
-                        hintText: "Enter your name",
+                      const SizedBox(height: 5),
+                      const Text(
+                        "Sign in to continue",
+                        style: TextStyle(fontSize: 15, color: Colors.grey),
                       ),
-                      Text(
+
+                      const SizedBox(height: 30),
+
+                      //EMAIL
+                      const Text(
                         "Email",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
@@ -123,7 +122,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           fontSize: 14,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       TextfieldCont(
                         controller: emailController,
                         hintText: "Enter your email",
@@ -140,6 +139,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
 
                       const SizedBox(height: 18),
 
+                      //PASSWORD
                       const Text(
                         "Password",
                         style: TextStyle(
@@ -148,7 +148,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           fontSize: 14,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       TextfieldCont(
                         controller: passwordController,
                         hintText: "Enter your password",
@@ -158,18 +158,19 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           if (value == null || value.isEmpty) {
                             return "Password cannot be empty";
                           } else if (value.length < 6) {
-                            return "Password must br at least 6 characters";
+                            return "Password must be at least 6 characters";
                           }
                           return null;
                         },
                       ),
-                      SizedBox(height: 10),
+
+                      const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {},
-                          child: Text(
-                            "Forgot Password",
+                          child: const Text(
+                            "Forgot Password?",
                             style: TextStyle(
                               color: Color(0xFF3D8BFF),
                               fontSize: 14,
@@ -178,8 +179,10 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 15),
 
+                      const SizedBox(height: 15),
+
+                      //SIGN IN BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -201,13 +204,13 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                                 ),
                               );
                               Fluttertoast.showToast(
-                                msg: "Login registration",
+                                msg: "Login successful",
                                 gravity: ToastGravity.BOTTOM,
                               );
                             }
                           },
                           child: const Text(
-                            "Sign Up",
+                            "Sign In",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
@@ -217,8 +220,9 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                         ),
                       ),
 
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
 
+                      //DIVIDER
                       Row(
                         children: [
                           Expanded(
@@ -227,10 +231,8 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                               thickness: 1,
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsetsGeometry.symmetric(
-                              horizontal: 10,
-                            ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
                               "Or continue with",
                               style: TextStyle(color: Colors.grey),
@@ -245,8 +247,9 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                         ],
                       ),
 
-                      SizedBox(height: 25),
+                      const SizedBox(height: 25),
 
+                      //GOOGLE BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 48,
@@ -260,18 +263,15 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                             elevation: 0,
                           ),
                           onPressed: () {
-                            Fluttertoast.showToast(
-                              msg: "Google Sign In clicked",
-                            );
+                            // Fluttertoast.showToast(
+                            //   msg: "Google Sign In clicked",
+                            // );
                           },
-
                           // icon: Image.asset(
-                          //   "assets/images/google_satu.png",
+                          //   "assets/images/google.png",
                           //   height: 20,
-                          //   width: ,
+                          //   width: 20,
                           // ),
-
-                          // KOMENT
                           label: const Text(
                             "Continue with Google",
                             style: TextStyle(
@@ -281,13 +281,15 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 35),
 
+                      const SizedBox(height: 35),
+
+                      //SIGN UP
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            "Already have an account?",
+                          const Text(
+                            "Don't have an account?",
                             style: TextStyle(color: Colors.grey),
                           ),
                           TextButton(
@@ -295,12 +297,12 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LoginScreenMindcare(),
+                                  builder: (context) => RegistrasiScreen(),
                                 ),
                               );
                             },
-                            child: Text(
-                              "Sign Up",
+                            child: const Text(
+                              "Sign In",
                               style: TextStyle(
                                 color: Color(0xFF3D8BFF),
                                 fontWeight: FontWeight.bold,
