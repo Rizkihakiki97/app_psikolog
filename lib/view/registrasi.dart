@@ -1,3 +1,5 @@
+import 'package:app_psikolog/database/db_helper.dart';
+import 'package:app_psikolog/model/user_model.dart';
 import 'package:app_psikolog/view/login_mindcare.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
@@ -193,6 +195,13 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
+                              final UserModel data = UserModel(
+                                name: usernameController.text,
+                                role: 'Psikolog',
+                                email: emailController.text,
+                                password: passwordController.text,
+                              );
+                              AppDatabase.createUser(data);
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(

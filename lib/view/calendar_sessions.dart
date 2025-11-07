@@ -1,3 +1,4 @@
+import 'package:app_psikolog/database/db_helper.dart';
 import 'package:app_psikolog/model/session_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +12,21 @@ class CalendarSessionsPage extends StatefulWidget {
 
 class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
   DateTime selectedDate = DateTime.now();
+  List<Map<String, dynamic>> _bookings = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBookings();
+  }
+
+  Future<void> _loadBookings() async {
+    final db = AppDatabase.instance;
+    final data = await db.getBookings();
+    setState(() {
+      _bookings = data;
+    });
+  }
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -54,19 +70,19 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
             child: const Text("Batal"),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (pasien.isNotEmpty && dokter.isNotEmpty && waktu.isNotEmpty) {
-                setState(() {
-                  String key = DateFormat('yyyy-MM-dd').format(selectedDate);
-                  SessionData.appointments.putIfAbsent(key, () => []);
-                  SessionData.appointments[key]!.add({
-                    'pasien': pasien,
-                    'dokter': dokter,
-                    'waktu': waktu,
-                  });
+                await AppDatabase.instance.insertBooking({
+                  'doctorName': dokter,
+                  'specialization': pasien, // sementara isi dengan nama pasien
+                  'date': DateFormat('yyyy-MM-dd').format(selectedDate),
+                  'time': waktu,
+                  'active': 1,
                 });
+
                 Navigator.pop(context);
                 _showSnackBar("Konsultasi berhasil ditambahkan!");
+                _loadBookings();
               } else {
                 _showSnackBar("Semua field wajib diisi!");
               }
@@ -78,16 +94,12 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
     );
   }
 
-  void _editAppointment(int index) {
-    String key = DateFormat('yyyy-MM-dd').format(selectedDate);
-    var current = SessionData.appointments[key]![index];
-    String pasien = current['pasien']!;
-    String dokter = current['dokter']!;
-    String waktu = current['waktu']!;
-
-    final pasienController = TextEditingController(text: pasien);
-    final dokterController = TextEditingController(text: dokter);
-    final waktuController = TextEditingController(text: waktu);
+  void _editAppointment(Map<String, dynamic> booking) {
+    final pasienController = TextEditingController(
+      text: booking['specialization'],
+    );
+    final dokterController = TextEditingController(text: booking['doctorName']);
+    final waktuController = TextEditingController(text: booking['time']);
 
     showDialog(
       context: context,
@@ -116,16 +128,18 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
             child: const Text("Batal"),
           ),
           ElevatedButton(
-            onPressed: () {
-              setState(() {
-                SessionData.appointments[key]![index] = {
-                  'pasien': pasienController.text,
-                  'dokter': dokterController.text,
-                  'waktu': waktuController.text,
-                };
+            onPressed: () async {
+              await AppDatabase.instance.updateBooking({
+                'id': booking['id'],
+                'doctorName': dokterController.text,
+                'specialization': pasienController.text,
+                'date': booking['date'],
+                'time': waktuController.text,
+                'active': booking['active'],
               });
               Navigator.pop(context);
               _showSnackBar("Data konsultasi berhasil diperbarui!");
+              _loadBookings();
             },
             child: const Text("Simpan"),
           ),
@@ -134,9 +148,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
     );
   }
 
-  void _deleteAppointment(int index) {
-    String key = DateFormat('yyyy-MM-dd').format(selectedDate);
-
+  void _deleteAppointment(int id) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -151,12 +163,11 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () {
-              setState(() {
-                SessionData.appointments[key]!.removeAt(index);
-              });
+            onPressed: () async {
+              await AppDatabase.instance.deleteBooking(id);
               Navigator.pop(context);
               _showSnackBar("Konsultasi berhasil dihapus!");
+              _loadBookings();
             },
             child: const Text("Hapus"),
           ),
@@ -243,69 +254,77 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: sessions.isEmpty
+            child:
+                _bookings
+                    .where(
+                      (b) =>
+                          b['date'] ==
+                          DateFormat('yyyy-MM-dd').format(selectedDate),
+                    )
+                    .toList()
+                    .isEmpty
                 ? const Center(
                     child: Text(
                       "No sessions scheduled for this day.",
                       style: TextStyle(color: Colors.grey),
                     ),
                   )
-                : ListView.builder(
-                    itemCount: sessions.length,
-                    itemBuilder: (context, index) {
-                      var data = sessions[index];
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 6,
-                        ),
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(12),
-                            leading: const Icon(
-                              Icons.person,
-                              color: Colors.blueAccent,
+                : ListView(
+                    children: _bookings
+                        .where(
+                          (b) =>
+                              b['date'] ==
+                              DateFormat('yyyy-MM-dd').format(selectedDate),
+                        )
+                        .map(
+                          (data) => Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
                             ),
-                            title: Text(
-                              data['pasien']!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.person,
+                                color: Colors.blueAccent,
+                              ),
+                              title: Text(
+                                data['specialization'], // pasien
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${data['doctorName']} • ${data['time']}',
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.green,
+                                    ),
+                                    onPressed: () => _editAppointment(data),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () =>
+                                        _deleteAppointment(data['id']),
+                                  ),
+                                ],
                               ),
                             ),
-                            subtitle: Text(
-                              '${data['dokter']} • ${data['waktu']}',
-                              style: const TextStyle(
-                                color: Colors.black54,
-                                fontSize: 13,
-                              ),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.green,
-                                  ),
-                                  onPressed: () => _editAppointment(index),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () => _deleteAppointment(index),
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                      );
-                    },
+                        )
+                        .toList(),
                   ),
           ),
         ],

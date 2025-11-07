@@ -1,3 +1,5 @@
+import 'package:app_psikolog/database/db_helper.dart';
+import 'package:app_psikolog/preferences/preferences_handler.dart';
 import 'package:app_psikolog/view/bottom_navbar.dart';
 import 'package:app_psikolog/view/registrasi.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
@@ -195,14 +197,31 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                             elevation: 3,
                             shadowColor: Colors.black.withOpacity(0.2),
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BottomNavbar(),
-                                ),
+                              final data = await AppDatabase.loginUser(
+                                email: emailController.text,
+                                password: passwordController.text,
                               );
+                              if (data != null) {
+                                PreferenceHandler.saveLogin(true);
+                                PreferenceHandler.saveUserData(
+                                  data.id!,
+                                  data.name,
+                                );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BottomNavbar(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Email atau password salah"),
+                                  ),
+                                );
+                              }
                               Fluttertoast.showToast(
                                 msg: "Login successful",
                                 gravity: ToastGravity.BOTTOM,
