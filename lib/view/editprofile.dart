@@ -64,7 +64,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           key: _formKey,
           child: Column(
             children: [
-              // Foto Profil
+              
               Center(
                 child: Stack(
                   children: [
@@ -95,7 +95,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               const SizedBox(height: 20),
 
-              // Input Nama
+              // Input Name
               _buildTextField(
                 label: "Full Name",
                 initialValue: name,

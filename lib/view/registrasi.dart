@@ -55,17 +55,24 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black,
+                                color: const Color.fromARGB(255, 255, 255, 255),
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        SizedBox(height: 8),
+                      ],
+                    ),
                     Text(
                       "Your mental wellness companion",
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: const Color.fromARGB(255, 243, 241, 241),
+                      ),
                     ),
                   ],
                 ),

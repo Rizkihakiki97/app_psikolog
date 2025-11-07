@@ -1,6 +1,6 @@
+import 'package:app_psikolog/global_data.dart'; // ✅ Tambahkan ini
 import 'package:app_psikolog/view/editprofile.dart';
 import 'package:app_psikolog/view/login_mindcare.dart';
-import 'package:app_psikolog/global_data.dart'; // ✅ Tambahkan ini
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -28,7 +28,7 @@ class ProfilePage extends StatelessWidget {
                 bottom: 30,
               ),
               decoration: const BoxDecoration(
-                color: Color(0xFF3D8BFF),
+                // color: Color(0xFF3D8BFF),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(25),
                   bottomRight: Radius.circular(25),

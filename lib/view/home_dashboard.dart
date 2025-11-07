@@ -8,7 +8,7 @@ class HomePageMindcare extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: const Color(0xfff8fabd4),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -18,7 +18,7 @@ class HomePageMindcare extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 25, 20, 30),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF3D8BFF),
+                  color: Color(0xFF0BA6DF),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(25),
                     bottomRight: Radius.circular(25),

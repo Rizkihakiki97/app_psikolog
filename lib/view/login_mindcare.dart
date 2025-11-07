@@ -57,7 +57,7 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: Color.fromARGB(221, 255, 255, 255),
                           ),
                         ),
                         Text(

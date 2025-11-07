@@ -318,6 +318,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
                                     ),
                                     onPressed: () =>
                                         _deleteAppointment(data['id']),
+                                        
                                   ),
                                 ],
                               ),
