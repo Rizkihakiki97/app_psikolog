@@ -2,6 +2,7 @@ import 'package:app_psikolog/database/db_helper.dart';
 import 'package:app_psikolog/model/user_model.dart';
 import 'package:app_psikolog/preferences/preferences_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -29,7 +30,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> _loadUserData() async {
     final id = await PreferenceHandler.getUserId();
     if (id != null) {
-      final user = await AppDatabase.getUserById(id);
+      final user = await DbHelper.getUserById(id);
       if (user != null) {
         setState(() {
           userId = user.id;
@@ -45,36 +46,40 @@ class _EditProfilePageState extends State<EditProfilePage> {
   // Simpan (Tambah/Edit)
   Future<void> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
-      final user = UserModel(
-        id: userId,
+      if (userId == null) return;
+
+      // 🔹 Ambil data lama biar field lain tidak kehapus
+      final oldUser = await DbHelper.getUserById(userId!);
+      if (oldUser == null) return;
+
+      final updatedUser = UserModel(
+        id: oldUser.id,
         name: nameC.text,
         email: emailC.text,
         phone: phoneC.text,
-        bio: bioC.text, password: '',
+        bio: bioC.text,
+        lisensi: oldUser.lisensi,
+        foto: oldUser.foto,
+        password: oldUser.password, // ⚠️ ambil password lama
+        role: oldUser.role, // kalau ada role
       );
 
-      if (userId == null) {
-        // Tambah data baru
-        await AppDatabase.createUser(user);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profile added successfully!")),
-        );
-      } else {
-        // Edit/update data
-        await AppDatabase.updateUser(user);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profile updated successfully!")),
-        );
-      }
+      await DbHelper.updateUser(updatedUser);
 
-      Navigator.pop(context);
+      // 🔹 update SharedPreferences biar email baru tersimpan
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Profile updated successfully!")),
+      );
+
+      Navigator.pop(context, true); // kirim sinyal berhasil
     }
   }
 
   // Hapus profil
   Future<void> _deleteProfile() async {
     if (userId != null) {
-      await AppDatabase.deleteUser(userId!);
+      await DbHelper.deleteUser(userId!);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile deleted successfully!")),
       );

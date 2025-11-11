@@ -1,14 +1,50 @@
-import 'package:app_psikolog/global_data.dart'; 
+import 'package:app_psikolog/database/db_helper.dart';
+import 'package:app_psikolog/global_data.dart';
+import 'package:app_psikolog/model/user_model.dart';
 import 'package:app_psikolog/view/editprofile.dart';
 import 'package:app_psikolog/view/login_mindcare.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  UserModel? user;
+
+  @override
+  void initState() {
+    super.initState();
+    getData(); // panggil data saat halaman pertama kali muncul
+  }
+
+  Future<void> getData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email'); // ambil email user login
+
+    if (email != null) {
+      final db = await DbHelper.db();
+      final result = await db.query(
+        DbHelper.tableUser,
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        setState(() {
+          user = UserModel.fromMap(result.first);
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // ✅ Ambil data global
+    // Ambil data global
     final totalSessions = GlobalData.totalSessions;
     final activeSessions = GlobalData.activeSessions;
     final savedSessions = GlobalData.savedSessions;
@@ -74,24 +110,25 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      "Rizky",
-                      style: TextStyle(
+                    Text(
+                      user?.name ?? 'Loading...',
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 5),
-                    const Text(
-                      "muhammdhakiki97@email.com",
-                      style: TextStyle(color: Colors.black54),
+                    Text(
+                      user?.email ?? 'Memuat email...',
+                      style: const TextStyle(color: Colors.black54),
                     ),
                     const SizedBox(height: 3),
-                    const Text(
-                      "+62 896-1567-4013",
-                      style: TextStyle(color: Colors.black45),
+                    Text(
+                      user?.phone ?? 'No. telepon belum diisi',
+                      style: const TextStyle(color: Colors.black45),
                     ),
                     const SizedBox(height: 20),
+
                     // ✅ Ambil data dari global
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -116,27 +153,30 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.person_outlined,
               title: "Edit Profile",
               subtitle: "Update your personal information",
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const EditProfilePage(),
                   ),
                 );
+                if (result == true) {
+                  getData(); // panggil ulang data profil
+                }
               },
               color: Colors.blue,
             ),
             _ProfileMenu(
               icon: Icons.calendar_today_outlined,
               title: "My Appointments",
-              subtitle: "$activeSessions upcoming sessions", // ✅ dinamis
+              subtitle: "$activeSessions upcoming sessions",
               onTap: () {},
               color: Colors.red.shade300,
             ),
             _ProfileMenu(
               icon: Icons.favorite_border,
               title: "Saved Psychologists",
-              subtitle: "$savedSessions saved", // ✅ dinamis
+              subtitle: "$savedSessions saved",
               onTap: () {},
               color: Colors.yellow.shade300,
             ),
@@ -224,7 +264,10 @@ class ProfilePage extends StatelessWidget {
                 ),
                 child: Center(
                   child: TextButton.icon(
-                    onPressed: () {
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear(); // bersihkan data login
+
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(

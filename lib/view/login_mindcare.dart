@@ -5,6 +5,7 @@ import 'package:app_psikolog/view/registrasi.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreenMindcare extends StatefulWidget {
   const LoginScreenMindcare({super.key});
@@ -14,6 +15,11 @@ class LoginScreenMindcare extends StatefulWidget {
 }
 
 class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
+  Future<void> saveUserSession(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', email);
+  }
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -50,7 +56,7 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Mindcare",
+                          "MindCare",
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w600,
@@ -163,13 +169,14 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           ),
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              final data = await AppDatabase.loginUser(
+                              final data = await DbHelper.loginUser(
                                 email: emailController.text,
                                 password: passwordController.text,
                               );
 
                               if (data != null) {
                                 await PreferenceHandler.saveLogin(true);
+                                await saveUserSession(emailController.text);
                                 await PreferenceHandler.saveUserData(
                                   data.id!,
                                   data.name,

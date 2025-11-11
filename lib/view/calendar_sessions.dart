@@ -1,5 +1,5 @@
 import 'package:app_psikolog/database/db_helper.dart';
-import 'package:app_psikolog/model/session_model.dart';
+import 'package:app_psikolog/model/booking_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -12,7 +12,7 @@ class CalendarSessionsPage extends StatefulWidget {
 
 class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
   DateTime selectedDate = DateTime.now();
-  List<Map<String, dynamic>> _bookings = [];
+  List<BookingModel> _bookings = [];
 
   @override
   void initState() {
@@ -21,11 +21,14 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
   }
 
   Future<void> _loadBookings() async {
-    final db = AppDatabase.instance;
-    final data = await db.getBookings();
-    setState(() {
-      _bookings = data;
-    });
+    try {
+      final data = await DbHelper.getAllBookings();
+      setState(() {
+        _bookings = data;
+      });
+    } catch (e) {
+      print("Error loading bookings: $e");
+    }
   }
 
   void _showSnackBar(String message) {
@@ -45,7 +48,11 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
 
     showDialog(
       context: context,
+      barrierDismissible: false,
+
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+
         title: const Text("Tambah Konsultasi"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -72,13 +79,15 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           ElevatedButton(
             onPressed: () async {
               if (pasien.isNotEmpty && dokter.isNotEmpty && waktu.isNotEmpty) {
-                await AppDatabase.instance.insertBooking({
-                  'doctorName': dokter,
-                  'specialization': pasien, // sementara isi dengan nama pasien
-                  'date': DateFormat('yyyy-MM-dd').format(selectedDate),
-                  'time': waktu,
-                  'active': 1,
-                });
+                final newBooking = BookingModel(
+                  doctorName: dokter,
+                  specialization: pasien,
+                  date: DateFormat('yyyy-MM-dd').format(selectedDate),
+                  time: waktu,
+                  active: true,
+                );
+
+                await DbHelper.insertBooking(newBooking);
 
                 Navigator.pop(context);
                 _showSnackBar("Konsultasi berhasil ditambahkan!");
@@ -94,12 +103,12 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
     );
   }
 
-  void _editAppointment(Map<String, dynamic> booking) {
+  void _editAppointment(BookingModel booking) {
     final pasienController = TextEditingController(
-      text: booking['specialization'],
+      text: booking.specialization,
     );
-    final dokterController = TextEditingController(text: booking['doctorName']);
-    final waktuController = TextEditingController(text: booking['time']);
+    final dokterController = TextEditingController(text: booking.doctorName);
+    final waktuController = TextEditingController(text: booking.time);
 
     showDialog(
       context: context,
@@ -129,14 +138,16 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              await AppDatabase.instance.updateBooking({
-                'id': booking['id'],
-                'doctorName': dokterController.text,
-                'specialization': pasienController.text,
-                'date': booking['date'],
-                'time': waktuController.text,
-                'active': booking['active'],
-              });
+              final updated = BookingModel(
+                id: booking.id,
+                doctorName: dokterController.text,
+                specialization: pasienController.text,
+                date: booking.date,
+                time: waktuController.text,
+                active: booking.active,
+              );
+
+              await DbHelper.updateBooking(updated);
               Navigator.pop(context);
               _showSnackBar("Data konsultasi berhasil diperbarui!");
               _loadBookings();
@@ -164,7 +175,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () async {
-              await AppDatabase.instance.deleteBooking(id);
+              await DbHelper.deleteBooking(id);
               Navigator.pop(context);
               _showSnackBar("Konsultasi berhasil dihapus!");
               _loadBookings();
@@ -179,14 +190,17 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
   @override
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
-    List<Map<String, String>> sessions =
-        SessionData.appointments[formattedDate] ?? [];
+
+    final filteredBookings = _bookings
+        .where((b) => b.date == formattedDate)
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xfff8fabd4),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0BA6DF),
         centerTitle: true,
+        // title: const Text("Consultation Calendar"),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
@@ -205,8 +219,8 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
               ),
             ),
             padding: const EdgeInsets.symmetric(vertical: 25),
-            child: Column(
-              children: const [
+            child: const Column(
+              children: [
                 Text(
                   "Consultation Calendar",
                   style: TextStyle(
@@ -228,12 +242,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
             decoration: BoxDecoration(
               color: Color(0xffCDC1FF),
               borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12.withOpacity(0.05),
-                  blurRadius: 8,
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
             ),
             child: CalendarDatePicker(
               initialDate: selectedDate,
@@ -257,77 +266,63 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child:
-                _bookings
-                    .where(
-                      (b) =>
-                          b['date'] ==
-                          DateFormat('yyyy-MM-dd').format(selectedDate),
-                    )
-                    .toList()
-                    .isEmpty
+            child: filteredBookings.isEmpty
                 ? const Center(
                     child: Text(
                       "No sessions scheduled for this day.",
                       style: TextStyle(color: Colors.grey),
                     ),
                   )
-                : ListView(
-                    children: _bookings
-                        .where(
-                          (b) =>
-                              b['date'] ==
-                              DateFormat('yyyy-MM-dd').format(selectedDate),
-                        )
-                        .map(
-                          (data) => Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 6,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: ListTile(
-                              leading: const Icon(
-                                Icons.person,
-                                color: Colors.blueAccent,
-                              ),
-                              title: Text(
-                                data['specialization'], // pasien
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              subtitle: Text(
-                                '${data['doctorName']} • ${data['time']}',
-                                style: const TextStyle(color: Colors.black54),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: Colors.green,
-                                    ),
-                                    onPressed: () => _editAppointment(data),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () =>
-                                        _deleteAppointment(data['id']),
-                                  ),
-                                ],
-                              ),
+                : ListView.builder(
+                    itemCount: filteredBookings.length,
+                    itemBuilder: (context, index) {
+                      final data = filteredBookings[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.person,
+                            color: Colors.blueAccent,
+                          ),
+                          title: Text(
+                            data.specialization,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
                           ),
-                        )
-                        .toList(),
+                          subtitle: Text(
+                            '${data.doctorName} • ${data.time}',
+                            style: const TextStyle(color: Colors.black54),
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Colors.green,
+                                ),
+                                onPressed: () => _editAppointment(data),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => _deleteAppointment(data.id!),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
           ),
         ],

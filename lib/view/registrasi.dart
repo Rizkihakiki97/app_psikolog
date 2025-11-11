@@ -51,7 +51,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Mindcare",
+                              "MindCare",
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w600,
@@ -204,7 +204,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                                 email: emailController.text,
                                 password: passwordController.text,
                               );
-                              AppDatabase.createUser(data);
+                              DbHelper.insertUser(data);
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
@@ -230,70 +230,69 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
 
                       SizedBox(height: 30),
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsetsGeometry.symmetric(
-                              horizontal: 10,
-                            ),
-                            child: Text(
-                              "Or continue with",
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: Divider(
+                      //         color: Colors.grey.shade300,
+                      //         thickness: 1,
+                      //       ),
+                      //     ),
+                      //     Padding(
+                      //       padding: EdgeInsetsGeometry.symmetric(
+                      //         horizontal: 10,
+                      //       ),
+                      //       child: Text(
+                      //         "Or continue with",
+                      //         style: TextStyle(color: Colors.grey),
+                      //       ),
+                      //     ),
+                      //     Expanded(
+                      //       child: Divider(
+                      //         color: Colors.grey.shade300,
+                      //         thickness: 1,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
 
-                      SizedBox(height: 25),
+                      // SizedBox(height: 25),
 
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: BorderSide(color: Colors.grey.shade300),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            Fluttertoast.showToast(
-                              msg: "Google Sign In clicked",
-                            );
-                          },
+                      // SizedBox(
+                      //   width: double.infinity,
+                      //   height: 48,
+                      //   child: OutlinedButton.icon(
+                      //     style: OutlinedButton.styleFrom(
+                      //       backgroundColor: Colors.white,
+                      //       side: BorderSide(color: Colors.grey.shade300),
+                      //       shape: RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(12),
+                      //       ),
+                      //       elevation: 0,
+                      //     ),
+                      //     onPressed: () {
+                      //       Fluttertoast.showToast(
+                      //         msg: "Google Sign In clicked",
+                      //       );
+                      //     },
 
-                          // icon: Image.asset(
-                          //   "assets/images/google_satu.png",
-                          //   height: 20,
-                          //   width: ,
-                          // ),
+                      //     // icon: Image.asset(
+                      //     //   "assets/images/google_satu.png",
+                      //     //   height: 20,
+                      //     //   width: ,
+                      //     // ),
 
-                          // KOMENT
-                          label: const Text(
-                            "Continue with Google",
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 35),
-
+                      //     // KOMENT
+                      //     label: const Text(
+                      //       "Continue with Google",
+                      //       style: TextStyle(
+                      //         color: Colors.black87,
+                      //         fontWeight: FontWeight.w500,
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+                      // SizedBox(height: 35),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

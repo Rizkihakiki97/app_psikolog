@@ -15,21 +15,27 @@ class BookingModel {
     required this.active,
   });
 
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'doctorName': doctorName,
-    'specialization': specialization,
-    'date': date,
-    'time': time,
-    'active': active ? 1 : 0,
-  };
+  // Convert from Map (database) to object
+  factory BookingModel.fromMap(Map<String, dynamic> map) {
+    return BookingModel(
+      id: map['id'],
+      doctorName: map['doctorName'],
+      specialization: map['specialization'],
+      date: map['date'],
+      time: map['time'],
+      active: map['active'] == 1, //  ubah dari int ke bool
+    );
+  }
 
-  static BookingModel fromMap(Map<String, dynamic> map) => BookingModel(
-    id: map['id'],
-    doctorName: map['doctorName'],
-    specialization: map['specialization'],
-    date: map['date'],
-    time: map['time'],
-    active: map['active'] == 1,
-  );
+  // Convert from object to Map (for database insert/update)
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'doctorName': doctorName,
+      'specialization': specialization,
+      'date': date,
+      'time': time,
+      'active': active ? 1 : 0, // ubah dari bool ke int
+    };
+  }
 }

@@ -27,7 +27,7 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Future<void> _fetchBookings() async {
-    final db = await AppDatabase.instance.database;
+    final db = await  DbHelper.db();
     final maps = await db.query('bookings');
     setState(() {
       bookings = maps.map((e) => BookingModel.fromMap(e)).toList();
@@ -36,7 +36,7 @@ class _BookingPageState extends State<BookingPage> {
 
   Future<void> _addBooking() async {
     if (nameCtrl.text.isEmpty || specCtrl.text.isEmpty) return;
-    final db = await AppDatabase.instance.database;
+    final db = await DbHelper.db();
     await db.insert('bookings', {
       'doctorName': nameCtrl.text,
       'specialization': specCtrl.text,
@@ -49,10 +49,11 @@ class _BookingPageState extends State<BookingPage> {
     dateCtrl.clear();
     timeCtrl.clear();
     _fetchBookings();
+
   }
 
   Future<void> _deleteBooking(int id) async {
-    final db = await AppDatabase.instance.database;
+    final db = await DbHelper.db();
     await db.delete('bookings', where: 'id = ?', whereArgs: [id]);
     _fetchBookings();
   }

@@ -23,7 +23,7 @@ class _RolePageState extends State<RolePage> {
   }
 
   Future<void> _fetchRoles() async {
-    final db = await AppDatabase.instance.database;
+    final db = await  DbHelper.db();
     final maps = await db.query('roles');
     setState(() {
       roles = maps.map((e) => RoleModel.fromMap(e)).toList();
@@ -32,14 +32,14 @@ class _RolePageState extends State<RolePage> {
 
   Future<void> _addRole(String name) async {
     if (name.isEmpty) return;
-    final db = await AppDatabase.instance.database;
+    final db = await  DbHelper.db();
     await db.insert('roles', {'name': name});
     controller.clear();
     _fetchRoles();
   }
 
   Future<void> _deleteRole(int id) async {
-    final db = await AppDatabase.instance.database;
+    final db = await  DbHelper.db();
     await db.delete('roles', where: 'id = ?', whereArgs: [id]);
     _fetchRoles();
   }

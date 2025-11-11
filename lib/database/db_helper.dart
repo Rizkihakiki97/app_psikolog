@@ -1,163 +1,176 @@
-import 'package:app_psikolog/model/user_model.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import '../model/user_model.dart';
+import '../model/booking_model.dart';
 
-class AppDatabase {
-  static final AppDatabase instance = AppDatabase._init();
-  static Database? _database;
+class DbHelper {
+  static const tableUser = 'users';
+  static const tableBooking = 'bookings';
 
-  AppDatabase._init();
-
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDB('mindcare.db');
-    return _database!;
-  }
-
-  static const String tableUser = 'users';
-
-  Future<Database> _initDB(String filePath) async {
+  static Future<Database> db() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return openDatabase(
+      join(dbPath, 'ppkd.db'),
+      version: 1,
+      onCreate: (db, version) async {
+        await db.execute('''
+        CREATE TABLE $tableUser(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          email TEXT,
+          bio TEXT,
+          lisensi TEXT,
+          foto TEXT,
+          phone TEXT,
+          password TEXT,
+          role TEXT
+        )
+        ''');
+
+        await db.execute('''
+        CREATE TABLE $tableBooking(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          doctorName TEXT,
+          specialization TEXT,
+          date TEXT,
+          time TEXT,
+          active INTEGER
+        )
+        ''');
+      },
+    );
   }
 
-  Future _createDB(Database db, int version) async {
-    // Tabel Users
-    await db.execute('''
-CREATE TABLE $tableUser(
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
-  bio TEXT,
-  lisensi TEXT,
-  foto TEXT,
-  phone TEXT,
-  password TEXT NOT NULL
-)
-''');
-
-    // Tabel Roles
-    await db.execute('''
-CREATE TABLE roles(
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL
-)
-''');
-
-    // Tabel Bookings
-    await db.execute('''
-CREATE TABLE bookings(
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  doctorName TEXT,
-  specialization TEXT,
-  date TEXT,
-  time TEXT,
-  active INTEGER
-)
-''');
-  }
-
-  // Tambah user baru (Register)
-  static Future<void> createUser(UserModel user) async {
-    final dbs = await instance.database;
-    await dbs.insert(
+  static Future<int> insertUser(UserModel user) async {
+    final dbs = await db();
+    return await dbs.insert(
       tableUser,
       user.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  // Ambil semua user
-  static Future<List<UserModel>> getAllUser() async {
-    final dbs = await instance.database;
-    final List<Map<String, dynamic>> results = await dbs.query(tableUser);
-    return results.map((e) => UserModel.fromMap(e)).toList();
+  static Future<List<UserModel>> getAllUsers() async {
+    final dbs = await db();
+    final List<Map<String, dynamic>> maps = await dbs.query(tableUser);
+    return List.generate(maps.length, (i) {
+      return UserModel.fromMap(maps[i]);
+    });
   }
 
-  // Update user (edit profile)
-  static Future<void> updateUser(UserModel user) async {
-    final dbs = await instance.database;
-    await dbs.update(
+  static Future<UserModel?> getUserByEmail(String email) async {
+    final dbs = await db();
+    final List<Map<String, dynamic>> maps = await dbs.query(
       tableUser,
-      user.toMap(),
-      where: 'id = ?',
-      whereArgs: [user.id],
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      where: 'email = ?',
+      whereArgs: [email],
     );
-  }
-
-  // Ambil user berdasarkan ID
-  static Future<UserModel?> getUserById(int id) async {
-    final dbs = await instance.database;
-    final results = await dbs.query(
-      tableUser,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    if (results.isNotEmpty) {
-      return UserModel.fromMap(results.first);
+    if (maps.isNotEmpty) {
+      return UserModel.fromMap(maps.first);
     }
     return null;
   }
 
-  // Hapus user berdasarkan ID
-  static Future<void> deleteUser(int id) async {
-    final dbs = await instance.database;
-    await dbs.delete(tableUser, where: 'id = ?', whereArgs: [id]);
+  static Future<int> updateUser(UserModel user) async {
+    final dbs = await db();
+    return await dbs.update(
+      tableUser,
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
   }
 
-  // LOGIN USER
+  static Future<int> deleteUser(int id) async {
+    final dbs = await db();
+    return await dbs.delete(tableUser, where: 'id = ?', whereArgs: [id]);
+  }
+
   static Future<UserModel?> loginUser({
     required String email,
     required String password,
   }) async {
-    final dbs = await instance.database;
-    final normalizedEmail = email.trim().toLowerCase();
+    final dbs = await db();
 
-    final List<Map<String, dynamic>> result = await dbs.query(
+    final List<Map<String, dynamic>> results = await dbs.query(
       tableUser,
-      where: 'LOWER(email) = ? AND password = ?',
-      whereArgs: [normalizedEmail, password],
+      where: 'email = ? AND password = ?',
+      whereArgs: [email, password],
+    );
+
+    if (results.isNotEmpty) {
+      // Jika email dan password cocok
+      return UserModel.fromMap(results.first);
+    } else {
+      // Jika tidak ditemukan
+      return null;
+    }
+  }
+
+  static Future<UserModel?> getUserById(int id) async {
+    final dbs = await db();
+
+    final List<Map<String, dynamic>> maps = await dbs.query(
+      tableUser,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return UserModel.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  // BOOKING
+  static Future<int> insertBooking(BookingModel booking) async {
+    final dbs = await db();
+    return await dbs.insert(
+      tableBooking,
+      booking.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<List<BookingModel>> getAllBookings() async {
+    final dbs = await db();
+    final List<Map<String, dynamic>> maps = await dbs.query(tableBooking);
+    return List.generate(maps.length, (i) {
+      return BookingModel.fromMap(maps[i]);
+    });
+  }
+
+  static Future<int> updateBooking(BookingModel booking) async {
+    final dbs = await db();
+    return await dbs.update(
+      tableBooking,
+      booking.toMap(),
+      where: 'id = ?',
+      whereArgs: [booking.id],
+    );
+  }
+
+  static Future<int> deleteBooking(int id) async {
+    final dbs = await db();
+    return await dbs.delete(tableBooking, where: 'id = ?', whereArgs: [id]);
+  }
+
+  static Future<UserModel?> getStudentFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email');
+    if (email == null) return null;
+
+    final db = await DbHelper.db();
+    final result = await db.query(
+      DbHelper.tableUser,
+      where: 'email = ?',
+      whereArgs: [email],
     );
 
     if (result.isNotEmpty) {
       return UserModel.fromMap(result.first);
     }
     return null;
-  }
-
-  // Tambah Booking
-  Future<int> insertBooking(Map<String, dynamic> data) async {
-    final db = await instance.database;
-    return await db.insert('bookings', data);
-  }
-
-  // Ambil semua booking
-  Future<List<Map<String, dynamic>>> getBookings() async {
-    final db = await instance.database;
-    return await db.query('bookings', orderBy: 'date DESC');
-  }
-
-  // Update booking
-  Future<int> updateBooking(Map<String, dynamic> data) async {
-    final db = await instance.database;
-    return await db.update(
-      'bookings',
-      data,
-      where: 'id = ?',
-      whereArgs: [data['id']],
-    );
-  }
-
-  // Hapus booking
-  Future<int> deleteBooking(int id) async {
-    final db = await instance.database;
-    return await db.delete('bookings', where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future close() async {
-    final db = await instance.database;
-    db.close();
   }
 }
