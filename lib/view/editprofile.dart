@@ -1,4 +1,5 @@
 import 'package:app_psikolog/database/db_helper.dart';
+import 'package:app_psikolog/model/user_model.dart';
 import 'package:app_psikolog/preferences/preferences_handler.dart';
 import 'package:flutter/material.dart';
 
@@ -11,41 +12,73 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  String? fullname;
-
-  // Simulasi data profil (nanti bisa diambil dari database)
-  String name = "Rizky";
-  String email = "muhammdhakiki97@email.com";
-  String phone = "+62 896-1567-4013";
-  String bio = "I’m a psychologist passionate about mental wellness.";
-
   final TextEditingController nameC = TextEditingController();
   final TextEditingController emailC = TextEditingController();
   final TextEditingController phoneC = TextEditingController();
   final TextEditingController bioC = TextEditingController();
 
+  int? userId;
+
   @override
   void initState() {
     super.initState();
-    PreferenceHandler.getUsername().then((value) {
-      setState(() {
-        fullname = value ?? 'Guest';
-      });
-    });
     _loadUserData();
   }
 
+  // 🔹 Load data user dari database
   Future<void> _loadUserData() async {
-    final userId = await PreferenceHandler.getUserId();
-    if (userId != null) {
-      final user = await AppDatabase.getUserById(userId);
+    final id = await PreferenceHandler.getUserId();
+    if (id != null) {
+      final user = await AppDatabase.getUserById(id);
       if (user != null) {
         setState(() {
+          userId = user.id;
           nameC.text = user.name;
           emailC.text = user.email;
-          bioC.text = user.password;
+          phoneC.text = user.phone ?? '';
+          bioC.text = user.bio ?? '';
         });
       }
+    }
+  }
+
+  // Simpan (Tambah/Edit)
+  Future<void> _saveProfile() async {
+    if (_formKey.currentState!.validate()) {
+      final user = UserModel(
+        id: userId,
+        name: nameC.text,
+        email: emailC.text,
+        phone: phoneC.text,
+        bio: bioC.text, password: '',
+      );
+
+      if (userId == null) {
+        // Tambah data baru
+        await AppDatabase.createUser(user);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile added successfully!")),
+        );
+      } else {
+        // Edit/update data
+        await AppDatabase.updateUser(user);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile updated successfully!")),
+        );
+      }
+
+      Navigator.pop(context);
+    }
+  }
+
+  // Hapus profil
+  Future<void> _deleteProfile() async {
+    if (userId != null) {
+      await AppDatabase.deleteUser(userId!);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Profile deleted successfully!")),
+      );
+      Navigator.pop(context);
     }
   }
 
@@ -57,6 +90,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
         title: const Text("Edit Profile"),
         backgroundColor: const Color(0xFF569ad1),
         elevation: 0,
+        actions: [
+          if (userId != null)
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.white),
+              onPressed: _deleteProfile,
+              tooltip: "Delete Profile",
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -64,7 +105,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           key: _formKey,
           child: Column(
             children: [
-              
+              // Avatar
               Center(
                 child: Stack(
                   children: [
@@ -95,65 +136,39 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               const SizedBox(height: 20),
 
-              // Input Name
+              // Form Field
+              _buildTextField("Full Name", nameC, Icons.person_outline),
               _buildTextField(
-                label: "Full Name",
-                initialValue: name,
-                icon: Icons.person_outline,
-                onSaved: (value) => name = value!,
-              ),
-
-              // Input Email
-              _buildTextField(
-                label: "Email",
-                initialValue: email,
-                icon: Icons.email_outlined,
+                "Email",
+                emailC,
+                Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
-                onSaved: (value) => email = value!,
               ),
-
-              // Input Nomor Telepon
               _buildTextField(
-                label: "Phone Number",
-                initialValue: phone,
-                icon: Icons.phone_outlined,
+                "Phone Number",
+                phoneC,
+                Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
-                onSaved: (value) => phone = value!,
               ),
-
-              // Input Bio
               _buildTextField(
-                label: "Bio / Description",
-                initialValue: bio,
-                icon: Icons.info_outline,
+                "Bio / Description",
+                bioC,
+                Icons.info_outline,
                 maxLines: 3,
-                onSaved: (value) => bio = value!,
               ),
 
               const SizedBox(height: 30),
 
-              // Tombol Simpan
+              // Tombol Save
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      // final UserModel data = UserModel(id: id, nama: nama, role: role)
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Profile updated successfully!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
-                  icon: const Icon(Icons.save_outlined),
+                  onPressed: _saveProfile,
+                  icon: const Icon(Icons.save_outlined, color: Colors.white),
                   label: const Text(
                     "Save Changes",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF569ad1),
@@ -170,19 +185,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  // Reusable Text Field Widget
-  Widget _buildTextField({
-    required String label,
-    required String initialValue,
-    required IconData icon,
-    required FormFieldSetter<String> onSaved,
+  // Widget input field
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    IconData icon, {
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
-        initialValue: initialValue,
+        controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
         decoration: InputDecoration(
@@ -203,13 +217,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             borderSide: const BorderSide(color: Color(0xFF569ad1)),
           ),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter $label';
-          }
-          return null;
-        },
-        onSaved: onSaved,
+        validator: (value) => value!.isEmpty ? "Please enter $label" : null,
       ),
     );
   }

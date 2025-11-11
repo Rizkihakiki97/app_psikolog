@@ -183,8 +183,11 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
         SessionData.appointments[formattedDate] ?? [];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(backgroundColor: Colors.blueAccent, centerTitle: true),
+      backgroundColor: const Color(0xfff8fabd4),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0BA6DF),
+        centerTitle: true,
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         onPressed: _addAppointment,
@@ -195,7 +198,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           Container(
             width: double.infinity,
             decoration: const BoxDecoration(
-              color: Colors.blueAccent,
+              color: Color(0xFF0BA6DF),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(25),
                 bottomRight: Radius.circular(25),
@@ -223,7 +226,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           Container(
             margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color(0xffCDC1FF),
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
@@ -318,7 +321,6 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
                                     ),
                                     onPressed: () =>
                                         _deleteAppointment(data['id']),
-                                        
                                   ),
                                 ],
                               ),

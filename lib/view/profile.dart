@@ -14,7 +14,7 @@ class ProfilePage extends StatelessWidget {
     final savedSessions = GlobalData.savedSessions;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F6FA),
+      backgroundColor: const Color(0xfff8fabd4),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -28,7 +28,7 @@ class ProfilePage extends StatelessWidget {
                 bottom: 30,
               ),
               decoration: const BoxDecoration(
-                // color: Color(0xFF3D8BFF),
+                color: Color(0xFF0BA6DF),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(25),
                   bottomRight: Radius.circular(25),

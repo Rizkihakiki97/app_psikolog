@@ -62,11 +62,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                         ),
                       ],
                     ),
-                    Row(
-                      children: [
-                        SizedBox(height: 8),
-                      ],
-                    ),
+                    Row(children: [SizedBox(height: 8)]),
                     Text(
                       "Your mental wellness companion",
                       style: TextStyle(
