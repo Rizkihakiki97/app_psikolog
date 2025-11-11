@@ -1,4 +1,4 @@
-import 'package:app_psikolog/global_data.dart'; // ✅ Tambahkan ini
+import 'package:app_psikolog/global_data.dart'; 
 import 'package:app_psikolog/view/editprofile.dart';
 import 'package:app_psikolog/view/login_mindcare.dart';
 import 'package:flutter/material.dart';
