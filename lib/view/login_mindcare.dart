@@ -1,6 +1,9 @@
 import 'package:app_psikolog/database/db_helper.dart';
+import 'package:app_psikolog/model/user_firebase_model.dart';
 import 'package:app_psikolog/preferences/preferences_handler.dart';
+import 'package:app_psikolog/services/firebase.dart';
 import 'package:app_psikolog/view/bottom_navbar.dart';
+import 'package:app_psikolog/view/home_dashboard.dart';
 import 'package:app_psikolog/view/registrasi.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
@@ -168,38 +171,21 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                             ),
                           ),
                           onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              final data = await DbHelper.loginUser(
-                                email: emailController.text,
-                                password: passwordController.text,
-                              );
+    if (_formKey.currentState!.validate()) {
+      UserFirebaseModel? user = await FirebaseService().loginUser(
+        email: emailController.text,
+        password: passwordController.text,
+      );
 
-                              if (data != null) {
-                                await PreferenceHandler.saveLogin(true);
-                                await saveUserSession(emailController.text);
-                                await PreferenceHandler.saveUserData(
-                                  data.id!,
-                                  data.name,
-                                );
-                                Fluttertoast.showToast(
-                                  msg: "Login successful",
-                                  gravity: ToastGravity.BOTTOM,
-                                );
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BottomNavbar(),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Email atau password salah"),
-                                  ),
-                                );
-                              }
-                            }
-                          },
+      if (user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePageMindcare()), // Ganti HomeScreen dengan layar tujuan setelah login
+        );
+      }
+      // Jika user null, toast error sudah ditampilkan di service
+    }
+  },
                           child: const Text(
                             "Sign In",
                             style: TextStyle(

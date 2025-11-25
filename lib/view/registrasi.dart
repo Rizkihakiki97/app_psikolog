@@ -1,4 +1,6 @@
 import 'package:app_psikolog/database/db_helper.dart';
+import 'package:app_psikolog/model/user_firebase_model.dart';
+import 'package:app_psikolog/services/firebase.dart';
 import 'package:app_psikolog/model/user_model.dart';
 import 'package:app_psikolog/view/login_mindcare.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
@@ -13,6 +15,7 @@ class RegistrasiScreen extends StatefulWidget {
 }
 
 class _RegistrasiScreenState extends State<RegistrasiScreen> {
+  UserFirebaseModel user = UserFirebaseModel();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -27,6 +30,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // Header
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 28, vertical: 40),
                 child: Column(
@@ -55,24 +59,25 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w600,
-                                color: const Color.fromARGB(255, 255, 255, 255),
+                                color: Colors.white,
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    Row(children: [SizedBox(height: 8)]),
+                    SizedBox(height: 8),
                     Text(
                       "Your mental wellness companion",
                       style: TextStyle(
                         fontSize: 13,
-                        color: const Color.fromARGB(255, 243, 241, 241),
+                        color: Colors.white70,
                       ),
                     ),
                   ],
                 ),
               ),
+              // Form
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 28, vertical: 30),
@@ -99,34 +104,27 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                       SizedBox(height: 5),
                       Text(
                         "Sign up to get started",
-                        style: TextStyle(
-                          fontSize: 19,
-                          color: const Color.fromARGB(255, 85, 83, 83),
-                        ),
+                        style: TextStyle(fontSize: 19, color: Colors.grey[800]),
                       ),
                       SizedBox(height: 30),
-
-                      Text(
-                        "Full Name",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      // Full Name
+                      Text("Full Name",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                              fontSize: 14)),
+                      SizedBox(height: 8),
                       TextfieldCont(
                         controller: usernameController,
                         hintText: "Enter your name",
                       ),
-                      Text(
-                        "Email",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                          fontSize: 14,
-                        ),
-                      ),
+                      SizedBox(height: 15),
+                      // Email
+                      Text("Email",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                              fontSize: 14)),
                       SizedBox(height: 8),
                       TextfieldCont(
                         controller: emailController,
@@ -141,17 +139,13 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           return null;
                         },
                       ),
-
-                      const SizedBox(height: 18),
-
-                      const Text(
-                        "Password",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                          fontSize: 14,
-                        ),
-                      ),
+                      SizedBox(height: 18),
+                      // Password
+                      Text("Password",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                              fontSize: 14)),
                       SizedBox(height: 8),
                       TextfieldCont(
                         controller: passwordController,
@@ -162,7 +156,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           if (value == null || value.isEmpty) {
                             return "Password cannot be empty";
                           } else if (value.length < 6) {
-                            return "Password must br at least 6 characters";
+                            return "Password must be at least 6 characters";
                           }
                           return null;
                         },
@@ -175,124 +169,54 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           child: Text(
                             "Forgot Password",
                             style: TextStyle(
-                              color: Color(0xFF3D8BFF),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                                color: Color(0xFF3D8BFF), fontSize: 14),
                           ),
                         ),
                       ),
                       SizedBox(height: 15),
-
+                      // Sign Up Button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3D8BFF),
+                            backgroundColor: Color(0xFF3D8BFF),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                                borderRadius: BorderRadius.circular(12)),
                             elevation: 3,
-                            shadowColor: Colors.black.withOpacity(0.2),
                           ),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              final UserModel data = UserModel(
-                                name: usernameController.text,
-                                role: 'Psikolog',
-                                email: emailController.text,
-                                password: passwordController.text,
-                              );
-                              DbHelper.insertUser(data);
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => LoginScreenMindcare(),
-                                ),
-                              );
-                              Fluttertoast.showToast(
-                                msg: "Login registration",
-                                gravity: ToastGravity.BOTTOM,
-                              );
-                            }
-                          },
+                          onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                UserFirebaseModel? newUser = await FirebaseService().registerUser(
+                                  name: usernameController.text,
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                  role: "Psikolog",
+                                );
+
+                                if (newUser != null) {
+                                  // Misalnya simpan ke lokal jika perlu
+                                  print("User baru: ${newUser.uid}, ${newUser.username}");
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => LoginScreenMindcare()),
+                                  );
+                                }
+                              }
+                            },
+
                           child: const Text(
                             "Sign Up",
                             style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: Colors.white),
                           ),
                         ),
                       ),
-
                       SizedBox(height: 30),
-
-                      // Row(
-                      //   children: [
-                      //     Expanded(
-                      //       child: Divider(
-                      //         color: Colors.grey.shade300,
-                      //         thickness: 1,
-                      //       ),
-                      //     ),
-                      //     Padding(
-                      //       padding: EdgeInsetsGeometry.symmetric(
-                      //         horizontal: 10,
-                      //       ),
-                      //       child: Text(
-                      //         "Or continue with",
-                      //         style: TextStyle(color: Colors.grey),
-                      //       ),
-                      //     ),
-                      //     Expanded(
-                      //       child: Divider(
-                      //         color: Colors.grey.shade300,
-                      //         thickness: 1,
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-
-                      // SizedBox(height: 25),
-
-                      // SizedBox(
-                      //   width: double.infinity,
-                      //   height: 48,
-                      //   child: OutlinedButton.icon(
-                      //     style: OutlinedButton.styleFrom(
-                      //       backgroundColor: Colors.white,
-                      //       side: BorderSide(color: Colors.grey.shade300),
-                      //       shape: RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(12),
-                      //       ),
-                      //       elevation: 0,
-                      //     ),
-                      //     onPressed: () {
-                      //       Fluttertoast.showToast(
-                      //         msg: "Google Sign In clicked",
-                      //       );
-                      //     },
-
-                      //     // icon: Image.asset(
-                      //     //   "assets/images/google_satu.png",
-                      //     //   height: 20,
-                      //     //   width: ,
-                      //     // ),
-
-                      //     // KOMENT
-                      //     label: const Text(
-                      //       "Continue with Google",
-                      //       style: TextStyle(
-                      //         color: Colors.black87,
-                      //         fontWeight: FontWeight.w500,
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
-                      // SizedBox(height: 35),
+                      // Already have account
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -305,16 +229,15 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LoginScreenMindcare(),
-                                ),
+                                    builder: (context) =>
+                                        LoginScreenMindcare()),
                               );
                             },
                             child: Text(
-                              "Sign Up",
+                              "Sign In",
                               style: TextStyle(
-                                color: Color(0xFF3D8BFF),
-                                fontWeight: FontWeight.bold,
-                              ),
+                                  color: Color(0xFF3D8BFF),
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
