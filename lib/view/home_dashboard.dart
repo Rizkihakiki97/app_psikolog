@@ -1,6 +1,35 @@
+import 'package:app_psikolog/model/MentalHealth_model.dart';
+// import 'package:app_psikolog/models/mental_health_tip.dart';
 import 'package:app_psikolog/pages/community_page.dart';
-import 'package:app_psikolog/view/calendar_sessions.dart'; // pastikan path ini sesuai dengan struktur project kamu
+import 'package:app_psikolog/view/calendar_sessions.dart';
+import 'package:app_psikolog/view/tip_detail_screen.dart';
 import 'package:flutter/material.dart';
+// import 'tip_detail_page.dart';
+
+
+List<MentalHealthTip> tips = [
+  MentalHealthTip(
+    image: "assets/image/gambar/orgil1.jpg",
+    title: "Managing Stress",
+    time: "5 Min read",
+    description:
+        "Learn effective ways to reduce stress through breathing techniques, journaling, and establishing healthy boundaries.",
+  ),
+  MentalHealthTip(
+    image: "assets/image/gambar/orgil2.jpg",
+    title: "Better Sleep",
+    time: "5 Min read",
+    description:
+        "Understand how to build a healthy night routine, reduce screen exposure, and improve your quality of sleep.",
+  ),
+  // MentalHealthTip(
+  //   image: "assets/tips/anxiety.png",
+  //   title: "Reduce Anxiety",
+  //   time: "4 Min read",
+  //   description:
+  //       "Discover calming strategies such as grounding, mindfulness, and relaxation techniques for anxiety relief.",
+  // ),
+];
 
 class HomePageMindcare extends StatelessWidget {
   const HomePageMindcare({super.key});
@@ -13,7 +42,8 @@ class HomePageMindcare extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // HEADER (Welcome)
+
+              // ======================= HEADER ===========================
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 25, 20, 30),
@@ -27,7 +57,8 @@ class HomePageMindcare extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Greeting
+
+                    // GREETING
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -53,15 +84,15 @@ class HomePageMindcare extends StatelessWidget {
                         ),
                         const CircleAvatar(
                           radius: 24,
-                          backgroundImage: AssetImage(
-                            "assets/image/gambar/psikolog.png",
-                          ),
+                          backgroundImage:
+                              AssetImage("assets/image/gambar/psikolog.png"),
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 20),
 
-                    // Search Bar
+                    // SEARCH BAR
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       decoration: BoxDecoration(
@@ -76,9 +107,10 @@ class HomePageMindcare extends StatelessWidget {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 20),
 
-                    // Horizontal Menu (ubah jadi pakai GestureDetector)
+                    // MENU
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -94,8 +126,7 @@ class HomePageMindcare extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const CalendarSessionsPage(),
+                                builder: (_) => const CalendarSessionsPage(),
                               ),
                             );
                           },
@@ -125,7 +156,7 @@ class HomePageMindcare extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // MOOD TRACKER CARD
+              // ======================= MOOD TRACKER ===========================
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(20),
@@ -183,15 +214,13 @@ class HomePageMindcare extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    const Text("", style: TextStyle(fontSize: 40)),
                   ],
                 ),
               ),
 
               const SizedBox(height: 25),
 
-              //FEATURED PSYCHOLOGISTS
+              // ====================== FEATURED PSYCHOLOGISTS =================
               _sectionHeader("Featured Psychologists"),
               _psychologistCard(
                 image: "assets/image/gambar/dokter1.jpg",
@@ -217,25 +246,46 @@ class HomePageMindcare extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              //MENTAL HEALTH TIPS
+              // ========================== MENTAL HEALTH TIPS ==========================
               _sectionHeader("Mental Health Tips"),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
                     Expanded(
-                      child: _tipCard(
-                        image: "assets/image/gambar/orgil1.jpg",
-                        title: "Managing Stress",
-                        subtitle: "5 Min read",
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TipDetailPage(tip: tips[0]),
+                            ),
+                          );
+                        },
+                        child: _tipCard(
+                          image: tips[0].image,
+                          title: tips[0].title,
+                          subtitle: tips[0].time,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: _tipCard(
-                        image: "assets/image/gambar/orgil2.jpg",
-                        title: "Better Sleep",
-                        subtitle: "5 Min read",
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TipDetailPage(tip: tips[1]),
+                            ),
+                          );
+                        },
+                        child: _tipCard(
+                          image: tips[1].image,
+                          title: tips[1].title,
+                          subtitle: tips[1].time,
+                        ),
                       ),
                     ),
                   ],
@@ -250,7 +300,9 @@ class HomePageMindcare extends StatelessWidget {
     );
   }
 
-  // REUSABLE COMPONENTS
+  // =============================================================
+  // WIDGET COMPONENTS
+  // =============================================================
 
   static Widget _menuCard({
     required IconData icon,
@@ -298,7 +350,6 @@ class HomePageMindcare extends StatelessWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
             ),
           ),
           TextButton(
@@ -399,7 +450,7 @@ class HomePageMindcare extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          Text(subtitle),
+          Text(subtitle, style: const TextStyle(color: Colors.grey)),
         ],
       ),
     );

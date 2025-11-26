@@ -1,14 +1,14 @@
 # RIVISI APLIKASI MINDCARE
 
 
-1. Tulisan mindcare di saat login gelap seperti background
-2. Dialog tambah konsultasi warna disesuaikan
-3. Listtile juga masih warna dasar
+1. Tulisan mindcare di saat login gelap seperti background #
+2. Dialog tambah konsultasi warna disesuaikan #
+3. Listtile juga masih warna dasar #
 4. Edit profile belum
 5. Tanggal hilang saat dipilih
 6. Bahasa dan warna masih mix
-7. Waktu harusnya bisa pakai time_picker
-8. bisa ditambah fitur mental_health
+7. Waktu harusnya bisa pakai time_picker #
+8. bisa ditambah fitur mental_health #
 
 
 # APP INFO

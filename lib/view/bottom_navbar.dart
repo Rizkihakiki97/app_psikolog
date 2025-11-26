@@ -16,7 +16,7 @@ class BottomNavbar extends StatefulWidget {
 class _BottomNavbarState extends State<BottomNavbar> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
+  final List<Widget> _pages = [
     HomePageMindcare(),
     ChatPage(),
     CalendarSessionsPage(), // posisi ke-3 harus Calendar
