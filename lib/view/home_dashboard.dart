@@ -97,8 +97,9 @@ class _HomePageMindcareState extends State<HomePageMindcare> {
                         ),
                         const CircleAvatar(
                           radius: 24,
-                          backgroundImage:
-                              AssetImage("assets/image/gambar/psikolog.png"),
+                          backgroundImage: AssetImage(
+                            "assets/images/gambar/psikolog.png",
+                          ),
                         ),
                       ],
                     ),
@@ -360,10 +361,7 @@ class _HomePageMindcareState extends State<HomePageMindcare> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           TextButton(
             onPressed: () {},
