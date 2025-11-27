@@ -1,38 +1,53 @@
 import 'package:app_psikolog/model/MentalHealth_model.dart';
-// import 'package:app_psikolog/models/mental_health_tip.dart';
 import 'package:app_psikolog/pages/community_page.dart';
+import 'package:app_psikolog/preferences/preferences_handler.dart';
 import 'package:app_psikolog/view/calendar_sessions.dart';
 import 'package:app_psikolog/view/tip_detail_screen.dart';
 import 'package:flutter/material.dart';
-// import 'tip_detail_page.dart';
-
 
 List<MentalHealthTip> tips = [
   MentalHealthTip(
-    image: "assets/image/gambar/orgil1.jpg",
+    image: "assets/images/gambar/orgil1.jpg",
     title: "Managing Stress",
     time: "5 Min read",
     description:
         "Learn effective ways to reduce stress through breathing techniques, journaling, and establishing healthy boundaries.",
   ),
   MentalHealthTip(
-    image: "assets/image/gambar/orgil2.jpg",
+    image: "assets/images/gambar/orgil2.jpg",
     title: "Better Sleep",
     time: "5 Min read",
     description:
         "Understand how to build a healthy night routine, reduce screen exposure, and improve your quality of sleep.",
   ),
-  // MentalHealthTip(
-  //   image: "assets/tips/anxiety.png",
-  //   title: "Reduce Anxiety",
-  //   time: "4 Min read",
-  //   description:
-  //       "Discover calming strategies such as grounding, mindfulness, and relaxation techniques for anxiety relief.",
-  // ),
 ];
 
-class HomePageMindcare extends StatelessWidget {
+class HomePageMindcare extends StatefulWidget {
   const HomePageMindcare({super.key});
+
+  @override
+  State<HomePageMindcare> createState() => _HomePageMindcareState();
+}
+
+class _HomePageMindcareState extends State<HomePageMindcare> {
+  String username = "";
+  String email = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    String? name = await PreferenceHandler.getUsername();
+    String? mail = await PreferenceHandler.getUserEmail();
+
+    setState(() {
+      username = name ?? "User";
+      email = mail ?? "";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +57,6 @@ class HomePageMindcare extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-
               // ======================= HEADER ===========================
               Container(
                 width: double.infinity,
@@ -57,15 +71,14 @@ class HomePageMindcare extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     // GREETING
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Column(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Good Morning",
                               style: TextStyle(
                                 color: Colors.white70,
@@ -73,8 +86,8 @@ class HomePageMindcare extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "Hi, Rizky Hakiki",
-                              style: TextStyle(
+                              "Hi, $username",
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -223,21 +236,21 @@ class HomePageMindcare extends StatelessWidget {
               // ====================== FEATURED PSYCHOLOGISTS =================
               _sectionHeader("Featured Psychologists"),
               _psychologistCard(
-                image: "assets/image/gambar/dokter1.jpg",
+                image: "assets/images/gambar/dokter1.jpg",
                 name: "Dr. Sarah Johnson",
                 spec: "Clinical Psychologist",
                 rating: 4.9,
                 exp: "6 years",
               ),
               _psychologistCard(
-                image: "assets/image/gambar/dokter2.png",
+                image: "assets/images/gambar/dokter2.png",
                 name: "Dr. Lissa Chen",
                 spec: "Cognitive Therapist",
                 rating: 4.8,
                 exp: "5 years",
               ),
               _psychologistCard(
-                image: "assets/image/gambar/dokter3.jpg",
+                image: "assets/images/gambar/dokter3.jpg",
                 name: "Dr. Emily Roberts",
                 spec: "Family Therapy",
                 rating: 4.7,

@@ -1,8 +1,6 @@
-import 'package:app_psikolog/database/db_helper.dart';
-import 'package:app_psikolog/model/user_model.dart';
 import 'package:app_psikolog/preferences/preferences_handler.dart';
+import 'package:app_psikolog/services/firebase.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -13,80 +11,92 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
+
   final TextEditingController nameC = TextEditingController();
   final TextEditingController emailC = TextEditingController();
   final TextEditingController phoneC = TextEditingController();
   final TextEditingController bioC = TextEditingController();
 
-  int? userId;
+  String? uid;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadUser();
   }
 
-  // 🔹 Load data user dari database
-  Future<void> _loadUserData() async {
-    final id = await PreferenceHandler.getUserId();
-    if (id != null) {
-      final user = await DbHelper.getUserById(id);
-      if (user != null) {
-        setState(() {
-          userId = user.id;
-          nameC.text = user.name;
-          emailC.text = user.email;
-          phoneC.text = user.phone ?? '';
-          bioC.text = user.bio ?? '';
-        });
-      }
+  // ============================================================
+  // 🔹 Load Data User dari SharedPreferences + Firestore
+  // ============================================================
+  Future<void> _loadUser() async {
+    uid = await PreferenceHandler.getUserId();
+
+    if (uid == null) return;
+
+    final user =
+        await FirebaseService().getUserByUid(uid!);
+
+    if (user != null) {
+      setState(() {
+        nameC.text = user.username ?? "";
+        emailC.text = user.email ?? "";
+      });
     }
   }
 
-  // Simpan (Tambah/Edit)
+  // ============================================================
+  // 🔹 UPDATE PROFILE FIREBASE + SharedPreferences
+  // ============================================================
   Future<void> _saveProfile() async {
-    if (_formKey.currentState!.validate()) {
-      if (userId == null) return;
+    if (!_formKey.currentState!.validate()) return;
 
-      // 🔹 Ambil data lama biar field lain tidak kehapus
-      final oldUser = await DbHelper.getUserById(userId!);
-      if (oldUser == null) return;
+    if (uid == null) return;
 
-      final updatedUser = UserModel(
-        id: oldUser.id,
+    final updateData = {
+      "username": nameC.text,
+      "email": emailC.text,
+      "phone": phoneC.text,
+      "bio": bioC.text,
+      "updatedAt": DateTime.now().toIso8601String(),
+    };
+
+    bool success = await FirebaseService().updateUser(
+      uid: uid!,
+      data: updateData,
+    );
+
+    if (success) {
+      // Update local (SharedPreferences)
+      await PreferenceHandler.saveUserData(
+        uid: uid!,
         name: nameC.text,
         email: emailC.text,
-        phone: phoneC.text,
-        bio: bioC.text,
-        lisensi: oldUser.lisensi,
-        foto: oldUser.foto,
-        password: oldUser.password, // ⚠️ ambil password lama
-        role: oldUser.role, // kalau ada role
       );
-
-      await DbHelper.updateUser(updatedUser);
-
-      // 🔹 update SharedPreferences biar email baru tersimpan
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully!")),
       );
 
-      Navigator.pop(context, true); // kirim sinyal berhasil
-    }
-  }
-
-  // Hapus profil
-  Future<void> _deleteProfile() async {
-    if (userId != null) {
-      await DbHelper.deleteUser(userId!);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile deleted successfully!")),
-      );
       Navigator.pop(context);
     }
   }
 
+  // ============================================================
+  // 🔹 DELETE PROFILE (Firestore + Auth)
+  // ============================================================
+  Future<void> _deleteProfile() async {
+    if (uid == null) return;
+
+    await FirebaseService().deleteUser(uid!);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Profile deleted successfully!")),
+    );
+
+    Navigator.pop(context);
+  }
+
+  // ============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,12 +106,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
         backgroundColor: const Color(0xFF569ad1),
         elevation: 0,
         actions: [
-          if (userId != null)
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.white),
-              onPressed: _deleteProfile,
-              tooltip: "Delete Profile",
-            ),
+          IconButton(
+            onPressed: _deleteProfile,
+            icon: const Icon(Icons.delete, color: Colors.white),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -116,9 +124,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   children: [
                     const CircleAvatar(
                       radius: 50,
-                      backgroundImage: AssetImage(
-                        'assets/image/gambar/psikolog.png',
-                      ),
+                      backgroundImage:
+                          AssetImage('assets/images/gambar/psikolog.png'),
                     ),
                     Positioned(
                       bottom: 0,
@@ -139,41 +146,27 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 20),
 
-              // Form Field
               _buildTextField("Full Name", nameC, Icons.person_outline),
-              _buildTextField(
-                "Email",
-                emailC,
-                Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              _buildTextField(
-                "Phone Number",
-                phoneC,
-                Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-              _buildTextField(
-                "Bio / Description",
-                bioC,
-                Icons.info_outline,
-                maxLines: 3,
-              ),
+              _buildTextField("Email", emailC, Icons.email_outlined),
+              _buildTextField("Phone Number", phoneC, Icons.phone_outlined),
+              _buildTextField("Bio / Description", bioC, Icons.info_outline,
+                  maxLines: 3),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
 
-              // Tombol Save
+              // SAVE BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton.icon(
                   onPressed: _saveProfile,
-                  icon: const Icon(Icons.save_outlined, color: Colors.white),
+                  icon: const Icon(Icons.save, color: Colors.white),
                   label: const Text(
                     "Save Changes",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF569ad1),
@@ -190,19 +183,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  // Widget input field
+  // ============================================================
+  // FIELD BUILDER
+  // ============================================================
   Widget _buildTextField(
     String label,
     TextEditingController controller,
     IconData icon, {
-    TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
-        keyboardType: keyboardType,
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
@@ -217,12 +210,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF569ad1)),
-          ),
         ),
-        validator: (value) => value!.isEmpty ? "Please enter $label" : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? "Please enter $label" : null,
       ),
     );
   }

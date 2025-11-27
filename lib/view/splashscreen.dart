@@ -14,27 +14,31 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    isLoginFunction();
+
+    // FIX: Navigasi harus menunggu 1 frame dulu
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkLogin();
+    });
   }
 
-  isLoginFunction() async {
-    Future.delayed(Duration(seconds: 1)).then((value) async {
-      var isLogin = await PreferenceHandler.getLogin();
-      print(isLogin);
-      if (isLogin != null && isLogin == true) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => BottomNavbar()),
-          (route) => false,
-        );
-      } else {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => LoginScreenMindcare()),
-          (route) => false,
-        );
-      }
-    });
+  Future<void> _checkLogin() async {
+    await Future.delayed(const Duration(seconds: 1)); // efek splash
+
+    final isLogin = await PreferenceHandler.getLogin() ?? false;
+
+    if (isLogin) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => BottomNavbar()),
+        (route) => false,
+      );
+    } else {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreenMindcare()),
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -45,16 +49,16 @@ class _SplashScreenState extends State<SplashScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xff256BE8), Color(0xff1CE2DA)],
+            colors: [
+              Color(0xff256BE8),
+              Color(0xff1CE2DA),
+            ],
           ),
         ),
-        // Biar full tinggi layar
         width: double.infinity,
         height: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [Center(child: Image.asset("assets/image/mindcare.png"))],
+        child: Center(
+          child: Image.asset("assets/images/mindcare1.png"),
         ),
       ),
     );

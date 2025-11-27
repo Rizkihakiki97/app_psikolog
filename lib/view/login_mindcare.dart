@@ -8,7 +8,6 @@ import 'package:app_psikolog/view/registrasi.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreenMindcare extends StatefulWidget {
   const LoginScreenMindcare({super.key});
@@ -18,11 +17,6 @@ class LoginScreenMindcare extends StatefulWidget {
 }
 
 class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
-  Future<void> saveUserSession(String email) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('email', email);
-  }
-
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -35,6 +29,7 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // HEADER
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 28,
@@ -78,9 +73,10 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                   ],
                 ),
               ),
+
+              // FORM LOGIN
               Container(
                 width: double.infinity,
-                height: 800,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 28,
                   vertical: 30,
@@ -112,7 +108,7 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                       ),
                       const SizedBox(height: 30),
 
-                      // Email
+                      // EMAIL
                       const Text(
                         "Email",
                         style: TextStyle(
@@ -134,9 +130,10 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           return null;
                         },
                       ),
+
                       const SizedBox(height: 18),
 
-                      // Password
+                      // PASSWORD
                       const Text(
                         "Password",
                         style: TextStyle(
@@ -157,9 +154,10 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           return null;
                         },
                       ),
+
                       const SizedBox(height: 25),
 
-                      // Tombol Login
+                      // LOGIN BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -171,21 +169,38 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                             ),
                           ),
                           onPressed: () async {
-    if (_formKey.currentState!.validate()) {
-      UserFirebaseModel? user = await FirebaseService().loginUser(
-        email: emailController.text,
-        password: passwordController.text,
-      );
+                            if (_formKey.currentState!.validate()) {
+                              UserFirebaseModel? user =
+                                  await FirebaseService().loginUser(
+                                email: emailController.text.trim(),
+                                password: passwordController.text.trim(),
+                              );
 
-      if (user != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePageMindcare()), // Ganti HomeScreen dengan layar tujuan setelah login
-        );
-      }
-      // Jika user null, toast error sudah ditampilkan di service
-    }
-  },
+                              if (user != null) {
+                                // 🔥 Simpan data user ke lokal
+                                await PreferenceHandler.saveUserData(
+                                  uid: user.uid ?? "",
+                                  name: user.username ?? "",
+                                  email: user.email ?? "",
+                                );
+
+                                // 🔥 Simpan status login
+                                await PreferenceHandler.saveLogin(true);
+
+                                Fluttertoast.showToast(
+                                  msg: "Login Success!",
+                                  gravity: ToastGravity.BOTTOM,
+                                );
+
+                                // 🔥 Pindah ke HomePage
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => BottomNavbar()),
+                                );
+                              }
+                            }
+                          },
                           child: const Text(
                             "Sign In",
                             style: TextStyle(
@@ -196,6 +211,7 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 25),
 
                       Row(

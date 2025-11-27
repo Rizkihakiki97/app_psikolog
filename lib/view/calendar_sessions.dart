@@ -1,9 +1,10 @@
 import 'package:app_psikolog/database/db_helper.dart';
 import 'package:app_psikolog/model/booking_model.dart';
-import 'package:app_psikolog/pages/home_page.dart';
+import 'package:app_psikolog/view/bottom_navbar.dart';
 import 'package:app_psikolog/view/home_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class CalendarSessionsPage extends StatefulWidget {
   const CalendarSessionsPage({super.key});
@@ -39,10 +40,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        content: Text(message, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: color,
         duration: const Duration(seconds: 2),
       ),
@@ -53,18 +51,11 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
     final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(useMaterial3: true),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {
-      final hour = picked.hour.toString().padLeft(2, '0');
-      final minute = picked.minute.toString().padLeft(2, '0');
-      controller.text = "$hour:$minute";
+      controller.text =
+          "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
     }
   }
 
@@ -79,7 +70,6 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         title: const Text("Tambah Konsultasi"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -110,9 +100,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              if (pasien.isNotEmpty &&
-                  dokter.isNotEmpty &&
-                  waktu.isNotEmpty) {
+              if (pasien.isNotEmpty && dokter.isNotEmpty && waktu.isNotEmpty) {
                 final newBooking = BookingModel(
                   doctorName: dokter,
                   specialization: pasien,
@@ -123,12 +111,10 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
 
                 await DbHelper.insertBooking(newBooking);
                 Navigator.pop(context);
-                _showSnackBar(
-                    "Konsultasi berhasil ditambahkan!", Colors.blueAccent);
+                _showSnackBar("Konsultasi berhasil ditambahkan!", Colors.blue);
                 _loadBookings();
               } else {
-                _showSnackBar(
-                    "Semua field wajib diisi!", Colors.orangeAccent);
+                _showSnackBar("Semua field wajib diisi!", Colors.orange);
               }
             },
             child: const Text("Simpan"),
@@ -163,9 +149,7 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
               controller: waktuController,
               readOnly: true,
               decoration: const InputDecoration(labelText: "Waktu"),
-              onTap: () async {
-                await _pickTime(waktuController);
-              },
+              onTap: () async => await _pickTime(waktuController),
             ),
           ],
         ),
@@ -223,209 +207,224 @@ class _CalendarSessionsPageState extends State<CalendarSessionsPage> {
     );
   }
 
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(useMaterial3: true),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-        dateController.text = DateFormat('yyyy-MM-dd').format(picked);
-      });
-    }
-  }
-
   @override
-  Widget build(BuildContext context) {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
-    final filteredBookings =
-        _bookings.where((b) => b.date == formattedDate).toList();
+  @override
+Widget build(BuildContext context) {
+  String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+  final filteredBookings =
+      _bookings.where((b) => b.date == formattedDate).toList();
 
-    return Scaffold(
-      backgroundColor: const Color(0xfff8fabd4),
+  return Scaffold(
+    backgroundColor: const Color(0xfff8fabd4),
 
-      appBar: AppBar(
-        toolbarHeight: 70,
-        backgroundColor: const Color(0xFF0BA6DF),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-
-          //  FIX BACK BUTTON → ANTI LAYAR HITAM
-          onPressed: () {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>  HomePage(),
+    appBar: AppBar(
+      backgroundColor: const Color(0xFF0BA6DF),
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+        onPressed: () {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const BottomNavbar()),
+            (route) => false,
+          );
+        },
       ),
-      (route) => false,
-    );
-  },
+      title: const Text(
+        "Consultation Calendar",
+        style: TextStyle(
+          fontSize: 20,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+
+    floatingActionButton: FloatingActionButton(
+      backgroundColor: Colors.blueAccent,
+      onPressed: _addAppointment,
+      child: const Icon(Icons.add),
+    ),
+
+    body: SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+
+          // ===========================
+          //  TEXTFIELD TAMPIL TANGGAL (TIDAK DAPAT DIKLIK)
+          // ===========================
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              controller: dateController,
+              readOnly: true,
+              enabled: false, // <<< tidak bisa diklik
+              decoration: InputDecoration(
+                labelText: "Tanggal Terpilih",
+                prefixIcon: const Icon(Icons.calendar_today),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ===========================
+          //  📌 KALENDER MUNCUL LANGSUNG
+          // ===========================
+          Container(
+  margin: const EdgeInsets.symmetric(horizontal: 16),
+  padding: const EdgeInsets.all(16),
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(255, 125, 179, 241),
+    borderRadius: BorderRadius.circular(20),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black12.withOpacity(0.07),
+        blurRadius: 8,
+        offset: const Offset(0, 4),
+      )
+    ],
+  ),
+  child:Theme(
+  data: Theme.of(context).copyWith(
+    // Tambahkan warna font Judul Calendar
+    textTheme: const TextTheme(
+      titleMedium: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+  child: TableCalendar(
+    focusedDay: selectedDate,
+    firstDay: DateTime.utc(2020),
+    lastDay: DateTime.utc(2030),
+
+    selectedDayPredicate: (day) {
+      return isSameDay(day, selectedDate);
+    },
+
+    onDaySelected: (selected, focused) {
+      setState(() {
+        selectedDate = selected;
+        dateController.text =
+            DateFormat('yyyy-MM-dd').format(selectedDate);
+      });
+    },
+
+    // ============================
+    // 🎨 STYLE KALENDER
+    // ============================
+    calendarStyle: CalendarStyle(
+      // Hari Diseleksi → LINGKARAN HITAM
+      selectedDecoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.black,
+      ),
+
+      // Teks hari yang dipilih
+      selectedTextStyle: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+
+      // Teks hari normal
+      defaultTextStyle: const TextStyle(
+        color: Colors.black87,
+        fontWeight: FontWeight.w600,
+      ),
+
+      // Hari ini → LINGKARAN BORDER MERAH
+      todayDecoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.red, width: 2),
+      ),
+    ),
+
+    // ============================
+    // 🎨 STYLE HEADER (bulan & tahun)
+    // ============================
+    headerStyle: const HeaderStyle(
+      formatButtonVisible: false,
+      titleCentered: true,
+      titleTextStyle: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Colors.white, // warna judul bulan/tahun
+      ),
+      leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
+      rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
+    ),
+
+    // ============================
+    // 🎨 STYLE HARI SENIN–MINGGU
+    // ============================
+    daysOfWeekStyle: const DaysOfWeekStyle(
+      weekendStyle: TextStyle(
+        color: Colors.red,
+        fontWeight: FontWeight.bold,
+      ),
+      weekdayStyle: TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
 ),
-        title: Column(
-          children: const [
-            Text(
-              "Consultation Calendar",
-              style: TextStyle(
-                fontSize: 22,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              "Check and manage patient appointments",
-              style: TextStyle(fontSize: 14, color: Colors.white70),
-            ),
-            SizedBox(height: 10),
-          ],
-        ),
-      ),
 
-      floatingActionButton: SizedBox(
-        width: 40,
-        height: 40,
-        child: FloatingActionButton(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-          backgroundColor: Colors.blueAccent,
-          onPressed: _addAppointment,
-          child: const Icon(Icons.add, size: 28),
-        ),
-      ),
 
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                controller: dateController,
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: "Pilih Tanggal",
-                  suffixIcon: const Icon(Icons.calendar_month),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                ),
-                onTap: _pickDate,
-              ),
-            ),
+),
 
-            const SizedBox(height: 10),
 
-            Container(
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xffCDC1FF),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 8)
-                ],
-              ),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  datePickerTheme: DatePickerThemeData(
-                    dayStyle: const TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w600),
-                    dayForegroundColor:
-                        MaterialStateProperty.resolveWith((states) {
-                      if (states.contains(MaterialState.selected)) {
-                        return Colors.white;
-                      }
-                      return Colors.black;
-                    }),
-                    dayBackgroundColor:
-                        MaterialStateProperty.resolveWith((states) {
-                      if (states.contains(MaterialState.selected)) {
-                        return const Color(0xFF2196F3);
-                      }
-                      return Colors.transparent;
-                    }),
-                    todayBorder:
-                        const BorderSide(color: Colors.red, width: 2),
-                  ),
-                ),
-                child: CalendarDatePicker(
-                  initialDate: selectedDate,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2030),
-                  onDateChanged: (date) {
-                    setState(() {
-                      selectedDate = date;
-                      dateController.text =
-                          DateFormat('yyyy-MM-dd').format(date);
-                    });
-                  },
-                ),
-              ),
-            ),
+          const SizedBox(height: 20),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Appointments on ${DateFormat('EEEE, MMM d').format(selectedDate)}",
+          // ===========================
+          //  LIST BOOKING
+          // ===========================
+          ...filteredBookings.map(
+            (data) => Card(
+              margin:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: ListTile(
+                leading:
+                    const Icon(Icons.person, color: Colors.blueAccent),
+                title: Text(
+                  data.specialization,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            ...filteredBookings.map(
-              (data) => Card(
-                margin: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 6),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-                child: ListTile(
-                  leading:
-                      const Icon(Icons.person, color: Colors.blueAccent),
-                  title: Text(
-                    data.specialization,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  subtitle: Text("${data.doctorName} • ${data.time}",
-                      style: const TextStyle(color: Colors.black54)),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon:
-                            const Icon(Icons.edit, color: Colors.green),
-                        onPressed: () => _editAppointment(data),
-                      ),
-                      IconButton(
-                        icon:
-                            const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () =>
-                            _deleteAppointment(data.id!),
-                      ),
-                    ],
-                  ),
+                subtitle: Text("${data.doctorName} • ${data.time}",
+                    style: const TextStyle(color: Colors.black54)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.green),
+                      onPressed: () => _editAppointment(data),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _deleteAppointment(data.id!),
+                    ),
+                  ],
                 ),
               ),
             ),
+          ),
 
-            const SizedBox(height: 80),
-          ],
-        ),
+          const SizedBox(height: 80),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 }

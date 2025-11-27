@@ -15,6 +15,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   UserModel? user;
+  String? emailFromPrefs; 
 
   @override
   void initState() {
@@ -22,26 +23,32 @@ class _ProfilePageState extends State<ProfilePage> {
     getData(); // panggil data saat halaman pertama kali muncul
   }
 
-  Future<void> getData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('email'); // ambil email user login
+Future<void> getData() async {
+  final prefs = await SharedPreferences.getInstance();
 
-    if (email != null) {
-      final db = await DbHelper.db();
-      final result = await db.query(
-        DbHelper.tableUser,
-        where: 'email = ?',
-        whereArgs: [email],
-      );
+  final email = prefs.getString('email'); //  email dari login
 
-      if (result.isNotEmpty) {
-        setState(() {
-          user = UserModel.fromMap(result.first);
-        });
-      }
+  setState(() {
+    emailFromPrefs = email;
+  });
+
+  if (email != null) {
+    final db = await DbHelper.db();
+    final result = await db.query(
+      DbHelper.tableUser,
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+
+    if (result.isNotEmpty) {
+      setState(() {
+        user = UserModel.fromMap(result.first);
+      });
     }
   }
+}
 
+  
   @override
   Widget build(BuildContext context) {
     // Ambil data global
@@ -106,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     const CircleAvatar(
                       radius: 40,
                       backgroundImage: AssetImage(
-                        'assets/image/gambar/psikolog.png',
+                        'assets/images/gambar/psikolog.png',
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -129,7 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // ✅ Ambil data dari global
+                    // Ambil data dari global
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [

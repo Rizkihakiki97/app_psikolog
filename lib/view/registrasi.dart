@@ -6,6 +6,7 @@ import 'package:app_psikolog/view/login_mindcare.dart';
 import 'package:app_psikolog/widgets/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:app_psikolog/preferences/preferences_handler.dart';
 
 class RegistrasiScreen extends StatefulWidget {
   const RegistrasiScreen({super.key});
@@ -25,49 +26,44 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A3D64),
+      backgroundColor: const Color(0xFF1A3D64),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Header
+              // HEADER
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 40),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Color(0xFFDCEAFF),
+                            color: const Color(0xFFDCEAFF),
                             borderRadius: BorderRadius.circular(14),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.psychology_outlined,
                             color: Color(0xFF3D8BFF),
                             size: 32,
                           ),
                         ),
-                        SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "MindCare",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 10),
+                        const Text(
+                          "MindCare",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
-                    Text(
+                    const SizedBox(height: 8),
+                    const Text(
                       "Your mental wellness companion",
                       style: TextStyle(
                         fontSize: 13,
@@ -77,11 +73,12 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                   ],
                 ),
               ),
-              // Form
+
+              // FORM
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 28, vertical: 30),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(28),
@@ -100,32 +97,35 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Create Account", style: TextStyle(fontSize: 22)),
-                      SizedBox(height: 5),
+                      const Text("Create Account", style: TextStyle(fontSize: 22)),
+                      const SizedBox(height: 5),
                       Text(
                         "Sign up to get started",
                         style: TextStyle(fontSize: 19, color: Colors.grey[800]),
                       ),
-                      SizedBox(height: 30),
-                      // Full Name
-                      Text("Full Name",
+                      const SizedBox(height: 30),
+
+                      // FULL NAME
+                      const Text("Full Name",
                           style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
                               fontSize: 14)),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       TextfieldCont(
                         controller: usernameController,
                         hintText: "Enter your name",
                       ),
-                      SizedBox(height: 15),
-                      // Email
-                      Text("Email",
+
+                      const SizedBox(height: 15),
+
+                      // EMAIL
+                      const Text("Email",
                           style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
                               fontSize: 14)),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       TextfieldCont(
                         controller: emailController,
                         hintText: "Enter your email",
@@ -139,14 +139,16 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 18),
-                      // Password
-                      Text("Password",
+
+                      const SizedBox(height: 18),
+
+                      // PASSWORD
+                      const Text("Password",
                           style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
                               fontSize: 14)),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       TextfieldCont(
                         controller: passwordController,
                         hintText: "Enter your password",
@@ -161,51 +163,70 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 10),
+
+                      const SizedBox(height: 10),
+
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {},
-                          child: Text(
+                          child: const Text(
                             "Forgot Password",
                             style: TextStyle(
                                 color: Color(0xFF3D8BFF), fontSize: 14),
                           ),
                         ),
                       ),
-                      SizedBox(height: 15),
-                      // Sign Up Button
+
+                      const SizedBox(height: 15),
+
+                      // SIGN UP BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF3D8BFF),
+                            backgroundColor: const Color(0xFF3D8BFF),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                             elevation: 3,
                           ),
                           onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                UserFirebaseModel? newUser = await FirebaseService().registerUser(
-                                  name: usernameController.text,
-                                  email: emailController.text,
-                                  password: passwordController.text,
-                                  role: "Psikolog",
+                            if (_formKey.currentState!.validate()) {
+                              UserFirebaseModel? newUser =
+                                  await FirebaseService().registerUser(
+                                name: usernameController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
+                                role: "Psikolog",
+                              );
+
+                              if (newUser != null) {
+                                // 🔥 SIMPAN USER KE SharedPreferences
+                                await PreferenceHandler.saveUserData(
+                                  uid: newUser.uid ?? "",
+                                  name: newUser.username ?? "",
+                                  email: newUser.email ?? "",
                                 );
 
-                                if (newUser != null) {
-                                  // Misalnya simpan ke lokal jika perlu
-                                  print("User baru: ${newUser.uid}, ${newUser.username}");
+                                // 🔥 SIMPAN STATUS LOGIN
+                                await PreferenceHandler.saveLogin(true);
 
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => LoginScreenMindcare()),
-                                  );
-                                }
+                                Fluttertoast.showToast(
+                                  msg: "Register Success!",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                );
+
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LoginScreenMindcare()),
+                                );
                               }
-                            },
-
+                            }
+                          },
                           child: const Text(
                             "Sign Up",
                             style: TextStyle(
@@ -215,12 +236,14 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 30),
-                      // Already have account
+
+                      const SizedBox(height: 30),
+
+                      // ALREADY HAVE ACCOUNT
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
+                          const Text(
                             "Already have an account?",
                             style: TextStyle(color: Colors.grey),
                           ),
@@ -230,10 +253,10 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        LoginScreenMindcare()),
+                                        const LoginScreenMindcare()),
                               );
                             },
-                            child: Text(
+                            child: const Text(
                               "Sign In",
                               style: TextStyle(
                                   color: Color(0xFF3D8BFF),

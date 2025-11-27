@@ -10,7 +10,7 @@ class FirebaseService {
   // ===================================================
   // REGISTER USER
   // ===================================================
- Future<UserFirebaseModel?> registerUser({
+  Future<UserFirebaseModel?> registerUser({
     required String name,
     required String email,
     required String password,
@@ -25,17 +25,15 @@ class FirebaseService {
 
       String uid = credential.user!.uid;
 
-      // Simpan data di Firestore
       await _firestore.collection("users").doc(uid).set({
         "uid": uid,
-        "username": name,         // sesuaikan dengan nama field model
+        "username": name,
         "email": email,
         "role": role,
         "createdAt": DateTime.now().toIso8601String(),
         "updatedAt": DateTime.now().toIso8601String(),
       });
 
-      // Buat model dari map
       UserFirebaseModel userModel = UserFirebaseModel(
         uid: uid,
         username: name,
@@ -44,147 +42,95 @@ class FirebaseService {
         updatedAt: DateTime.now().toIso8601String(),
       );
 
-      Fluttertoast.showToast(
-        msg: "Registrasi Berhasil!",
-        gravity: ToastGravity.BOTTOM,
-      );
+      Fluttertoast.showToast(msg: "Registrasi Berhasil!");
 
       return userModel;
     } on FirebaseAuthException catch (e) {
-      Fluttertoast.showToast(
-        msg: "Error Registrasi: ${e.code} - ${e.message}",
-        gravity: ToastGravity.BOTTOM,
-      );
+      Fluttertoast.showToast(msg: "Error Registrasi: ${e.code}");
       return null;
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Error Registrasi: $e",
-        gravity: ToastGravity.BOTTOM,
-      );
+      Fluttertoast.showToast(msg: "Error Registrasi: $e");
       return null;
     }
   }
 
-Future<UserFirebaseModel?> loginUser({
-  required String email,
-  required String password,
-}) async {
-  try {
-    final userCredential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+  // ===================================================
+  // LOGIN USER
+  // ===================================================
+  Future<UserFirebaseModel?> loginUser({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      UserCredential credential = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
 
-    final userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
+      String uid = credential.user!.uid;
 
-    if (userDoc.exists) {
-      final userModel = UserFirebaseModel.fromMap(userDoc.data()!);
-      Fluttertoast.showToast(
-        msg: "Login Berhasil!",
-        gravity: ToastGravity.BOTTOM,
-      );
-      return userModel;
-    } else {
-      Fluttertoast.showToast(
-        msg: "Data user tidak ditemukan di Firestore",
-        gravity: ToastGravity.BOTTOM,
-      );
+      DocumentSnapshot snapshot =
+          await _firestore.collection("users").doc(uid).get();
+
+      if (snapshot.exists) {
+        Fluttertoast.showToast(msg: "Login Berhasil!");
+        return UserFirebaseModel.fromMap(snapshot.data() as Map<String, dynamic>);
+      }
+
+      Fluttertoast.showToast(msg: "Data user tidak ditemukan di Firestore");
+      return null;
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Login Gagal: $e");
       return null;
     }
-  } catch (e) {
-    Fluttertoast.showToast(
-      msg: "Login Gagal: $e",
-      gravity: ToastGravity.BOTTOM,
-    );
-    return null;
+  }
+
+  // ===================================================
+  // GET USER BY UID
+  // ===================================================
+  Future<UserFirebaseModel?> getUserByUid(String uid) async {
+    try {
+      DocumentSnapshot snapshot =
+          await _firestore.collection("users").doc(uid).get();
+      if (snapshot.exists) {
+        return UserFirebaseModel.fromMap(snapshot.data() as Map<String, dynamic>);
+      }
+      return null;
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Gagal mengambil user: $e");
+      return null;
+    }
+  }
+
+  // ===================================================
+  // UPDATE USER
+  // ===================================================
+  Future<bool> updateUser({
+    required String uid,
+    required Map<String, dynamic> data,
+  }) async {
+    try {
+      await _firestore.collection("users").doc(uid).update(data);
+
+      Fluttertoast.showToast(msg: "Profile Updated!");
+
+      return true;
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Gagal Update User: $e");
+      return false;
+    }
+  }
+
+  // ===================================================
+  // DELETE USER
+  // ===================================================
+  Future<bool> deleteUser(String uid) async {
+    try {
+      await _firestore.collection("users").doc(uid).delete();
+      await _auth.currentUser?.delete();
+      Fluttertoast.showToast(msg: "User Berhasil Dihapus!");
+      return true;
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Gagal Menghapus User: $e");
+      return false;
+    }
   }
 }
-
-}
-
-  // Future<void> logoutUser() async {
-  //   await _auth.signOut();
-  //   Fluttertoast.showToast(
-  //     msg: "Berhasil Logout!",
-  //     gravity: ToastGravity.BOTTOM,
-  //   );
-  // }
-
-//   // ===================================================
-//   // GET USER BY UID
-//   // ===================================================
-//   Future<DocumentSnapshot<Map<String, dynamic>>?> getUserById(
-//       String uid) async {
-//     try {
-//       return await _firestore.collection("users").doc(uid).get();
-//     } catch (e) {
-//       Fluttertoast.showToast(
-//           msg: "Gagal mengambil data user: $e",
-//           gravity: ToastGravity.BOTTOM);
-//       return null;
-//     }
-//   }
-
-//   // ===================================================
-//   // GET ALL USERS
-//   // ===================================================
-//   Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>?>
-//       getAllUsers() async {
-//     try {
-//       var result = await _firestore.collection("users").get();
-//       return result.docs;
-//     } catch (e) {
-//       Fluttertoast.showToast(
-//           msg: "Gagal mengambil semua user: $e",
-//           gravity: ToastGravity.BOTTOM);
-//       return null;
-//     }
-//   }
-
-//   // ===================================================
-//   // UPDATE USER
-//   // ===================================================
-//   Future<bool> updateUser({
-//     required String uid,
-//     required Map<String, dynamic> data,
-//   }) async {
-//     try {
-//       await _firestore.collection("users").doc(uid).update(data);
-
-//       Fluttertoast.showToast(
-//         msg: "Update User Berhasil!",
-//         gravity: ToastGravity.BOTTOM,
-//       );
-
-//       return true;
-//     } catch (e) {
-//       Fluttertoast.showToast(
-//         msg: "Gagal Update User: $e",
-//         gravity: ToastGravity.BOTTOM,
-//       );
-//       return false;
-//     }
-//   }
-
-//   // ===================================================
-//   // DELETE USER
-//   // ===================================================
-//   Future<bool> deleteUser(String uid) async {
-//     try {
-//       await _firestore.collection("users").doc(uid).delete();
-
-//       Fluttertoast.showToast(
-//         msg: "User Berhasil Dihapus!",
-//         gravity: ToastGravity.BOTTOM,
-//       );
-
-//       return true;
-//     } catch (e) {
-//       Fluttertoast.showToast(
-//         msg: "Gagal Menghapus User: $e",
-//         gravity: ToastGravity.BOTTOM,
-//       );
-//       return false;
-//     }
-//   }
-// }
