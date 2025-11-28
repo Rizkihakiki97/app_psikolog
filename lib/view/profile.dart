@@ -1,6 +1,9 @@
 import 'package:app_psikolog/database/db_helper.dart';
 import 'package:app_psikolog/global_data.dart';
+import 'package:app_psikolog/model/user_firebase_model.dart';
 import 'package:app_psikolog/model/user_model.dart';
+import 'package:app_psikolog/preferences/preferences_handler.dart';
+import 'package:app_psikolog/services/firebase.dart';
 import 'package:app_psikolog/view/editprofile.dart';
 import 'package:app_psikolog/view/login_mindcare.dart';
 import 'package:flutter/material.dart';
@@ -14,39 +17,26 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  UserModel? user;
+  UserFirebaseModel? user;
+  bool loading = true;
   String? emailFromPrefs; 
 
   @override
   void initState() {
     super.initState();
-    getData(); // panggil data saat halaman pertama kali muncul
+    loadUserProfile(); // panggil data saat halaman pertama kali muncul
   }
 
-Future<void> getData() async {
-  final prefs = await SharedPreferences.getInstance();
 
-  final email = prefs.getString('email'); //  email dari login
 
-  setState(() {
-    emailFromPrefs = email;
-  });
+void loadUserProfile() async {
+  user = await FirebaseService.getProfile();
 
-  if (email != null) {
-    final db = await DbHelper.db();
-    final result = await db.query(
-      DbHelper.tableUser,
-      where: 'email = ?',
-      whereArgs: [email],
-    );
-
-    if (result.isNotEmpty) {
-      setState(() {
-        user = UserModel.fromMap(result.first);
-      });
-    }
+  if (mounted) {
+    setState(() => loading = false);
   }
 }
+
 
   
   @override
@@ -118,7 +108,7 @@ Future<void> getData() async {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      user?.name ?? 'Loading...',
+                      user?.username ?? 'Loading...',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -130,10 +120,10 @@ Future<void> getData() async {
                       style: const TextStyle(color: Colors.black54),
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      user?.phone ?? 'No. telepon belum diisi',
-                      style: const TextStyle(color: Colors.black45),
-                    ),
+                    // Text(
+                    //   user?. ?? 'No. telepon belum diisi',
+                    //   style: const TextStyle(color: Colors.black45),
+                    // ),
                     const SizedBox(height: 20),
 
                     // Ambil data dari global
@@ -168,7 +158,7 @@ Future<void> getData() async {
                   ),
                 );
                 if (result == true) {
-                  getData(); // panggil ulang data profil
+                  loadUserProfile(); // panggil ulang data profil
                 }
               },
               color: Colors.blue,

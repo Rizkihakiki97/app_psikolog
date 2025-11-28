@@ -171,20 +171,20 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               UserFirebaseModel? user =
-                                  await FirebaseService().loginUser(
+                                  await FirebaseService.loginUser(
                                 email: emailController.text.trim(),
                                 password: passwordController.text.trim(),
                               );
 
                               if (user != null) {
-                                // 🔥 Simpan data user ke lokal
+                                //Simpan data user ke lokal
                                 await PreferenceHandler.saveUserData(
                                   uid: user.uid ?? "",
                                   name: user.username ?? "",
                                   email: user.email ?? "",
                                 );
 
-                                // 🔥 Simpan status login
+                                //Simpan status login
                                 await PreferenceHandler.saveLogin(true);
 
                                 Fluttertoast.showToast(
@@ -192,7 +192,7 @@ class _LoginScreenMindcareState extends State<LoginScreenMindcare> {
                                   gravity: ToastGravity.BOTTOM,
                                 );
 
-                                // 🔥 Pindah ke HomePage
+                                //Pindah ke HomePage
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(

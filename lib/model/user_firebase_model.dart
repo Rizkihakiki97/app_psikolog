@@ -4,6 +4,9 @@ class UserFirebaseModel {
   String? uid;
   String? username;
   String? email;
+  String? phone;
+  String? photo;
+  String? bio;
   String? createdAt;
   String? updatedAt;
 
@@ -11,6 +14,9 @@ class UserFirebaseModel {
     this.uid,
     this.username,
     this.email,
+    this.phone,
+    this.photo,
+    this.bio,
     this.createdAt,
     this.updatedAt,
   });
@@ -20,6 +26,9 @@ class UserFirebaseModel {
       'uid': uid,
       'username': username,
       'email': email,
+      'phone': phone,
+      'photo': photo,
+      'bio': bio,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -30,6 +39,9 @@ class UserFirebaseModel {
       uid: map['uid'] as String?,
       username: map['username'] as String?,
       email: map['email'] as String?,
+      phone: map['phone'] as String?,
+      photo: map['photo'] as String?,
+      bio: map['bio'] as String?,
       createdAt: map['createdAt'] as String?,
       updatedAt: map['updatedAt'] as String?,
     );

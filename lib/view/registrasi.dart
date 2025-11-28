@@ -194,7 +194,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               UserFirebaseModel? newUser =
-                                  await FirebaseService().registerUser(
+                                  await FirebaseService.registerUser(
                                 name: usernameController.text,
                                 email: emailController.text,
                                 password: passwordController.text,

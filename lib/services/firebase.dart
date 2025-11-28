@@ -4,13 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class FirebaseService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // ===================================================
   // REGISTER USER
   // ===================================================
-  Future<UserFirebaseModel?> registerUser({
+  static Future<UserFirebaseModel?> registerUser({
     required String name,
     required String email,
     required String password,
@@ -57,7 +57,7 @@ class FirebaseService {
   // ===================================================
   // LOGIN USER
   // ===================================================
-  Future<UserFirebaseModel?> loginUser({
+  static Future<UserFirebaseModel?> loginUser({
     required String email,
     required String password,
   }) async {
@@ -82,6 +82,35 @@ class FirebaseService {
       return null;
     }
   }
+
+  static Future<UserFirebaseModel?> getProfile() async {
+  try {
+    // Ambil user yang sedang login
+    User? user = _auth.currentUser;
+
+    if (user == null) {
+      Fluttertoast.showToast(msg: "Tidak ada user yang login");
+      return null;
+    }
+
+    String uid = user.uid;
+
+    // Ambil data dari Firestore
+    DocumentSnapshot snapshot =
+        await _firestore.collection("users").doc(uid).get();
+
+    if (snapshot.exists) {
+      return UserFirebaseModel.fromMap(snapshot.data() as Map<String, dynamic>);
+    } else {
+      Fluttertoast.showToast(msg: "Data user tidak ditemukan di Firestore");
+      return null;
+    }
+  } catch (e) {
+    Fluttertoast.showToast(msg: "Gagal mendapatkan profil: $e");
+    return null;
+  }
+  }
+
 
   // ===================================================
   // GET USER BY UID

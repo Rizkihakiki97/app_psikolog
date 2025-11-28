@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:app_psikolog/preferences/preferences_handler.dart';
 import 'package:app_psikolog/services/firebase.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -18,6 +21,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController bioC = TextEditingController();
 
   String? uid;
+  String? profileUrl;
+  File? imageFile;
 
   @override
   void initState() {
@@ -25,48 +30,84 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _loadUser();
   }
 
-  // ============================================================
-  // Load Data User dari SharedPreferences + Firestore
-  // ============================================================
+  // ===================================================================
+  // LOAD USER FIRESTORE
+  // ===================================================================
   Future<void> _loadUser() async {
     uid = await PreferenceHandler.getUserId();
-
     if (uid == null) return;
 
-    final user =
-        await FirebaseService().getUserByUid(uid!);
+    final user = await FirebaseService().getUserByUid(uid!);
 
     if (user != null) {
       setState(() {
         nameC.text = user.username ?? "";
         emailC.text = user.email ?? "";
+        phoneC.text = user.phone ?? "";
+        bioC.text = user.bio ?? "";
+        profileUrl = user.photo;
       });
     }
   }
 
-  // ============================================================
-  // UPDATE PROFILE FIREBASE + SharedPreferences
-  // ============================================================
+  // ===================================================================
+  // PILIH FOTO DARI GALLERY / CAMERA
+  // ===================================================================
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+
+    final XFile? picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (picked != null) {
+      setState(() => imageFile = File(picked.path));
+      await _uploadImage();
+    }
+  }
+
+  // ===================================================================
+  // UPLOAD FOTO KE FIREBASE STORAGE
+  // ===================================================================
+  Future<void> _uploadImage() async {
+    if (imageFile == null || uid == null) return;
+
+    final storageRef =
+        FirebaseStorage.instance.ref().child("profile_photos/$uid.jpg");
+
+    await storageRef.putFile(imageFile!);
+
+    final downloadUrl = await storageRef.getDownloadURL();
+
+    setState(() => profileUrl = downloadUrl);
+
+    // Simpan ke Firestore
+    await FirebaseService().updateUser(
+      uid: uid!,
+      data: {"photoUrl": downloadUrl},
+    );
+  }
+
+  // ===================================================================
+  // SAVE PROFILE FIX
+  // ===================================================================
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
-
     if (uid == null) return;
 
     final updateData = {
       "username": nameC.text,
-      "email": emailC.text,
       "phone": phoneC.text,
       "bio": bioC.text,
+      "photoUrl": profileUrl,
       "updatedAt": DateTime.now().toIso8601String(),
     };
 
-    bool success = await FirebaseService().updateUser(
-      uid: uid!,
-      data: updateData,
-    );
+    bool success =
+        await FirebaseService().updateUser(uid: uid!, data: updateData);
 
     if (success) {
-      // Update local (SharedPreferences)
       await PreferenceHandler.saveUserData(
         uid: uid!,
         name: nameC.text,
@@ -81,9 +122,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  // ============================================================
-  // DELETE PROFILE (Firestore + Auth)
-  // ============================================================
+  // ===================================================================
+  // DELETE PROFILE
+  // ===================================================================
   Future<void> _deleteProfile() async {
     if (uid == null) return;
 
@@ -96,6 +137,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     Navigator.pop(context);
   }
 
+  // ===================================================================
+  // UI
+  // ===================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,28 +161,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
           key: _formKey,
           child: Column(
             children: [
-              // Avatar
+              // =========================
+              // AVATAR FOTO
+              // =========================
               Center(
                 child: Stack(
                   children: [
-                    const CircleAvatar(
-                      radius: 50,
-                      backgroundImage:
-                          AssetImage('assets/images/gambar/psikolog.png'),
+                    CircleAvatar(
+                      radius: 55,
+                      backgroundImage: imageFile != null
+                          ? FileImage(imageFile!)
+                          : (profileUrl != null
+                              ? NetworkImage(profileUrl!)
+                              : const AssetImage(
+                                      'assets/images/gambar/psikolog.png')
+                                  as ImageProvider),
                     ),
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFF569ad1),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 18,
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF569ad1),
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),
@@ -149,7 +203,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
               const SizedBox(height: 20),
 
               _buildTextField("Full Name", nameC, Icons.person_outline),
-              _buildTextField("Email", emailC, Icons.email_outlined),
+              _buildTextField("Email", emailC, Icons.email_outlined,
+                  enabled: false),
               _buildTextField("Phone Number", phoneC, Icons.phone_outlined),
               _buildTextField("Bio / Description", bioC, Icons.info_outline,
                   maxLines: 3),
@@ -182,20 +237,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  // ============================================================
+  // ===================================================================
   // FIELD BUILDER
-  // ============================================================
+  // ===================================================================
   Widget _buildTextField(
     String label,
     TextEditingController controller,
     IconData icon, {
     int maxLines = 1,
+    bool enabled = true,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
         maxLines: maxLines,
+        enabled: enabled,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon, color: const Color(0xFF569ad1)),
@@ -203,15 +260,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
           fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF569ad1)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
           ),
         ),
-        validator: (value) =>
-            (value == null || value.isEmpty) ? "Please enter $label" : null,
       ),
     );
   }
