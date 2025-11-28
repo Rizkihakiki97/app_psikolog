@@ -26,7 +26,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   // ============================================================
-  // 🔹 Load Data User dari SharedPreferences + Firestore
+  // Load Data User dari SharedPreferences + Firestore
   // ============================================================
   Future<void> _loadUser() async {
     uid = await PreferenceHandler.getUserId();
@@ -45,7 +45,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   // ============================================================
-  // 🔹 UPDATE PROFILE FIREBASE + SharedPreferences
+  // UPDATE PROFILE FIREBASE + SharedPreferences
   // ============================================================
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
@@ -82,7 +82,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   // ============================================================
-  // 🔹 DELETE PROFILE (Firestore + Auth)
+  // DELETE PROFILE (Firestore + Auth)
   // ============================================================
   Future<void> _deleteProfile() async {
     if (uid == null) return;
@@ -96,7 +96,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     Navigator.pop(context);
   }
 
-  // ============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
